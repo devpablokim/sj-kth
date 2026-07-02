@@ -5,7 +5,9 @@ import DataTable from "@/components/DataTable";
 import Overview from "@/components/Overview";
 import UploadZone from "@/components/UploadZone";
 import { availableYears } from "@/lib/metrics";
-import type { Dataset } from "@/lib/types";
+import { recalcProjects } from "@/lib/derive";
+import { downloadExcel } from "@/lib/exportExcel";
+import type { Dataset, Row } from "@/lib/types";
 import sampleData from "@/lib/sampleData.json";
 
 const LS_KEY = "sj-kth-dataset-v1";
@@ -44,6 +46,19 @@ export default function Home() {
     localStorage.removeItem(LS_KEY);
     setDs(null);
     setYearSel(null);
+  };
+
+  const updateSheet = (name: string, rows: Row[]) => {
+    if (!ds) return;
+    let sheets = { ...ds.sheets, [name]: rows };
+    if (name === "매출" || name === "프로젝트") sheets = recalcProjects(sheets);
+    const next = { ...ds, sheets };
+    setDs(next);
+    try {
+      localStorage.setItem(LS_KEY, JSON.stringify(next));
+    } catch {
+      // 저장 실패해도 화면 표시는 계속
+    }
   };
 
   const years = useMemo(() => (ds ? availableYears(ds) : []), [ds]);
@@ -124,6 +139,12 @@ export default function Home() {
               ))}
             </select>
           )}
+          <button
+            onClick={() => downloadExcel(ds)}
+            className="rounded-lg bg-emerald-500 px-3 py-1.5 text-sm font-medium text-white transition hover:bg-emerald-600"
+          >
+            ⬇ 엑셀 다운로드
+          </button>
           <UploadZone onData={load} onError={(m) => setError(m)} compact />
           <button
             onClick={clear}
@@ -153,7 +174,15 @@ export default function Home() {
         {error && (
           <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">⚠️ {error}</p>
         )}
-        {tab === "개요" ? <Overview ds={ds} year={year} /> : <DataTable rows={ds.sheets[tab] ?? []} />}
+        {tab === "개요" ? (
+          <Overview ds={ds} year={year} />
+        ) : (
+          <DataTable
+            sheetName={tab}
+            rows={ds.sheets[tab] ?? []}
+            onChange={(rows) => updateSheet(tab, rows)}
+          />
+        )}
       </main>
 
       <footer className="pb-8 text-center text-xs text-slate-400">
