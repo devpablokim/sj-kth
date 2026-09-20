@@ -1,10 +1,10 @@
 /*
- * Header — 세리프 헤드라인 "find what makes them buy" + 회색 메타라인,
+ * Header — 세리프 헤드라인 "find what makes them buy" + 회색 메타라인(포스트 출처 · 건수 · 브랜드 · 플랫폼),
  * 우측에 LIVE/DEMO 모드 배지와 판정/시안 모델 ID.
  */
 "use client";
 
-import type { Post } from "@/lib/types";
+import type { Post, PostSource } from "@/lib/types";
 import { fmtInt } from "@/lib/format";
 
 interface Props {
@@ -12,9 +12,16 @@ interface Props {
   mode: "live" | "demo" | null;
   jevModel: string | null;
   draftModel: string | null;
-  /** 포스트 출처 — 샘플 데이터셋인지, 사용자가 붙여넣은 데이터인지 */
-  source?: "sample" | "custom";
+  /** 포스트 출처 — 샘플 / AI 생성 예시 / 붙여넣기 / YouTube 검색 */
+  source?: PostSource;
 }
+
+const SOURCE_META: Record<PostSource, string> = {
+  sample: "sample dataset",
+  generated: "AI-generated examples · 실제 게시물 아님",
+  pasted: "pasted posts",
+  youtube: "youtube search",
+};
 
 export default function Header({ posts, mode, jevModel, draftModel, source = "sample" }: Props) {
   const brands = new Set(posts.map((p) => p.brand)).size;
@@ -27,8 +34,8 @@ export default function Header({ posts, mode, jevModel, draftModel, source = "sa
           find what makes them buy
         </h1>
         <p className="mt-1.5 text-[12px] leading-snug text-muted">
-          {source === "custom" ? "loaded posts" : "sample dataset"} · this run: {fmtInt(posts.length)} posts, {brands}{" "}
-          brands, {platforms} platforms · every hook, CTA and social proof
+          {SOURCE_META[source] ?? SOURCE_META.sample} · this run: {fmtInt(posts.length)} posts, {brands} brands,{" "}
+          {platforms} platforms · every hook, CTA and social proof
         </p>
       </div>
 
