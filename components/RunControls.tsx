@@ -190,14 +190,11 @@ function Spinner() {
   );
 }
 
-/** input 에서 Enter → 폼 제출 대신 해당 모드의 동작 */
-function onEnter(fn: () => void) {
-  return (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && !e.nativeEvent.isComposing) {
-      e.preventDefault();
-      fn();
-    }
-  };
+/** input 에서 Enter(한글 조합 중 제외) — 폼 제출 대신 해당 모드의 동작을 실행할지 */
+function isEnter(e: KeyboardEvent<HTMLInputElement>): boolean {
+  if (e.key !== "Enter" || e.nativeEvent.isComposing) return false;
+  e.preventDefault();
+  return true;
 }
 
 export default function RunControls({
@@ -508,9 +505,9 @@ export default function RunControls({
                     className={inputCls}
                     value={competitors}
                     onChange={(e) => setCompetitors(e.target.value)}
-                    onKeyDown={onEnter(() => {
-                      if (canGenerate) void generate();
-                    })}
+                    onKeyDown={(e) => {
+                      if (isEnter(e) && canGenerate) void generate();
+                    }}
                     placeholder="예: 패스트캠퍼스, 클래스101, 인프런"
                     disabled={busy}
                   />
@@ -686,9 +683,9 @@ export default function RunControls({
                     className={inputCls}
                     value={ytValue}
                     onChange={(e) => setYtQuery(e.target.value)}
-                    onKeyDown={onEnter(() => {
-                      if (!busy) void search();
-                    })}
+                    onKeyDown={(e) => {
+                      if (isEnter(e) && !busy) void search();
+                    }}
                     placeholder="예: AI 컨설팅 교육"
                     disabled={busy}
                   />

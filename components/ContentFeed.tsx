@@ -57,7 +57,7 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
       </div>
       {posts.length === 0 ? (
         <div className="flex flex-1 items-center justify-center py-16 text-[12px] text-muted">
-          표시할 포스트가 없습니다. 위 '분석 대상'에서 불러오거나 샘플을 사용하세요.
+          표시할 포스트가 없습니다. 위 &lsquo;분석 대상&rsquo;에서 불러오거나 샘플을 사용하세요.
         </div>
       ) : (
         <div className={`thin-scroll grid max-h-[560px] ${cols} gap-[5px] overflow-y-auto pr-0.5`} role="list">
