@@ -7,6 +7,12 @@
 import type { RunStats } from "@/lib/types";
 import { fmtFixed, fmtInt, fmtSec, fmtUsd } from "@/lib/format";
 
+/** ₩ 표시 — 100원 미만은 소수 1자리(₩17.2), 그 이상은 정수 콤마 */
+function fmtKrw(krw: number | undefined | null): string {
+  if (!krw || !Number.isFinite(krw)) return "0";
+  return krw < 100 ? fmtFixed(krw, 1) : fmtInt(krw);
+}
+
 interface Props {
   stats: RunStats;
   /** 클라이언트 타이머 기준 경과 ms (실행 중 틱) */
@@ -20,11 +26,14 @@ function Tile({
   value,
   dark = false,
   hint,
+  sub,
 }: {
   label: string;
   value: string;
   dark?: boolean;
   hint?: string;
+  /** 큰 숫자 아래 9px 보조 줄 (예: ≈ ₩17.2 · 추정치). 모든 타일이 같은 높이를 갖도록 빈 줄도 렌더 */
+  sub?: string;
 }) {
   return (
     <div
@@ -35,9 +44,17 @@ function Tile({
       title={hint}
     >
       <span className={["label", dark ? "!text-white/60" : ""].join(" ")}>{label}</span>
-      <span key={value} className="flick tabular font-mono text-[22px] font-bold leading-none">
-        {value}
-      </span>
+      <div className="flex flex-col gap-1">
+        <span key={value} className="flick tabular font-mono text-[22px] font-bold leading-none">
+          {value}
+        </span>
+        <span
+          className={["tabular block min-h-[9px] font-mono text-[9px] leading-none", dark ? "text-white/50" : "text-muted"].join(" ")}
+          aria-hidden={sub ? undefined : true}
+        >
+          {sub ?? ""}
+        </span>
+      </div>
     </div>
   );
 }
@@ -57,7 +74,8 @@ export default function StatTiles({ stats, elapsedMs, costIsEstimate }: Props) {
         <Tile
           label={costIsEstimate ? "cost so far ≈" : "cost so far"}
           value={fmtUsd(stats.costUsd, 4)}
-          hint={costIsEstimate ? "추정치 — 가격표를 못 가져와 기본 단가로 계산" : "AI Gateway 가격 기준 누적 비용"}
+          sub={`≈ ₩${fmtKrw(stats.costKrw)}${costIsEstimate ? " · 추정치" : ""}`}
+          hint={costIsEstimate ? "추정치 — 가격표를 못 가져와 기본 단가로 계산 (₩ 환산 KRW_PER_USD)" : "AI Gateway 가격 기준 누적 비용 (₩ 환산 KRW_PER_USD)"}
         />
       </div>
     </div>

@@ -1,12 +1,13 @@
 /*
  * useRun — /api/analyze 의 SSE 스트림을 읽어 RunEvent 를 리듀서로 접는 클라이언트 훅.
  * `data: {json}` 라인이 빈 줄로 구분되어 오며, 청크가 중간에 잘릴 수 있어 버퍼링 후 파싱합니다.
- * 상태: mode, posts, analyses(Map), current, stats, drafts, errors, status(idle|running|done|error).
+ * 상태: mode, posts, analyses(Map), current, stats, drafts, errors, status(idle|running|done|error),
+ * calls(jev/생성 모델 호출 원문 로그 — 최대 500개, clearCalls() 로 비움).
  */
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import type { Draft, Post, PostAnalysis, RunEvent, RunRequest, RunStats } from "@/lib/types";
+import type { CallLogEntry, Draft, Post, PostAnalysis, RunEvent, RunRequest, RunStats } from "@/lib/types";
 
 export type RunStatus = "idle" | "running" | "done" | "error";
 
@@ -38,7 +39,11 @@ export interface RunState {
   endedAt: number | null;
   /** 사용자가 STOP 으로 중단했는지 */
   stopped: boolean;
+  /** jev/생성 모델 호출 원문 로그 (오래된 순, 최대 MAX_CALLS 개) */
+  calls: CallLogEntry[];
 }
+
+const MAX_CALLS = 500;
 
 export const EMPTY_STATS: RunStats = {
   postsTotal: 0,
@@ -48,6 +53,7 @@ export const EMPTY_STATS: RunStats = {
   postsPerSec: 0,
   elapsedMs: 0,
   costUsd: 0,
+  costKrw: 0,
   draftsGenerated: 0,
 };
 
@@ -57,7 +63,8 @@ type Action =
   | { type: "client_error"; message: string; at: number }
   | { type: "stopped"; at: number }
   | { type: "stream_end"; at: number }
-  | { type: "set_posts"; posts: Post[] };
+  | { type: "set_posts"; posts: Post[] }
+  | { type: "clear_calls" };
 
 function initialState(posts: Post[]): RunState {
   return {
@@ -77,6 +84,7 @@ function initialState(posts: Post[]): RunState {
     startedAt: null,
     endedAt: null,
     stopped: false,
+    calls: [],
   };
 }
 
@@ -88,16 +96,21 @@ function reduce(state: RunState, action: Action): RunState {
         mode: state.mode,
         jevModel: state.jevModel,
         draftModel: state.draftModel,
+        calls: state.calls,
       };
     case "start":
+      // 호출 로그는 실행을 넘어 누적됨 (사용자가 "지우기" 로 비울 때까지)
       return {
         ...initialState(action.posts),
         mode: state.mode,
         jevModel: state.jevModel,
         draftModel: state.draftModel,
+        calls: state.calls,
         status: "running",
         startedAt: action.at,
       };
+    case "clear_calls":
+      return { ...state, calls: [] };
     case "client_error":
       return {
         ...state,
@@ -188,6 +201,10 @@ function applyEvent(state: RunState, e: RunEvent): RunState {
         errors: [...state.errors, { postId: e.sourcePostId, message: e.message, at: e.at }],
         stats: mergeStats(state.stats, e.stats),
       };
+    case "call_log": {
+      const calls = state.calls.length >= MAX_CALLS ? state.calls.slice(state.calls.length - MAX_CALLS + 1) : state.calls;
+      return { ...state, calls: [...calls, e.entry] };
+    }
     case "run_end":
       return {
         ...state,
@@ -224,6 +241,7 @@ function mergeStats(prev: RunStats, next: RunStats | undefined): RunStats {
     postsPerSec: next.postsPerSec ?? prev.postsPerSec,
     elapsedMs: Math.max(prev.elapsedMs, next.elapsedMs ?? 0),
     costUsd: next.costUsd ?? prev.costUsd,
+    costKrw: next.costKrw ?? prev.costKrw,
     draftsGenerated: next.draftsGenerated ?? prev.draftsGenerated,
   };
 }
@@ -266,6 +284,10 @@ export function useRun(initialPosts: Post[]) {
 
   const setPosts = useCallback((posts: Post[]) => {
     dispatch({ type: "set_posts", posts });
+  }, []);
+
+  const clearCalls = useCallback(() => {
+    dispatch({ type: "clear_calls" });
   }, []);
 
   const start = useCallback(
@@ -337,5 +359,5 @@ export function useRun(initialPosts: Post[]) {
     [],
   );
 
-  return { state, start, stop, setPosts };
+  return { state, start, stop, setPosts, clearCalls };
 }
