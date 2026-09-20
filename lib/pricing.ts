@@ -2,7 +2,7 @@
  * jev 호출 비용 추정 (서버 전용).
  * live 모드에서는 gateway.getAvailableModels() 로 모델의 토큰당 단가를 조회하고,
  * 실패하거나 단가가 없으면 env(JEV_PRICE_INPUT_PER_M / JEV_PRICE_OUTPUT_PER_M) 또는
- * 기본 상수(1M 토큰당 $0.10 / $0.40)를 "추정치"로 사용합니다.
+ * 기본 상수(1M 토큰당 $0.04, 쇼케이스 실측 추정)를 "추정치"로 사용합니다.
  */
 import { gateway } from "ai";
 
@@ -18,9 +18,20 @@ export interface JevPricing {
   estimated: boolean;
 }
 
-/** 기본 단가 (USD per 1M tokens). 실제 jev 단가는 gateway 모델 목록에서 덮어씁니다. */
-export const DEFAULT_JEV_PRICE_INPUT_PER_M = 0.1;
-export const DEFAULT_JEV_PRICE_OUTPUT_PER_M = 0.4;
+/**
+ * 기본 단가 (USD per 1M tokens). 실제 jev 단가는 gateway 모델 목록에서 덮어씁니다.
+ * 기본값은 JEV 쇼케이스 실측(입력 토큰 기준 ₩0.058/1k ≈ $0.04/1M)에서 가져온 추정치입니다.
+ * (docs/reference/jev-showcase.md 참고)
+ */
+export const DEFAULT_JEV_PRICE_INPUT_PER_M = 0.04;
+export const DEFAULT_JEV_PRICE_OUTPUT_PER_M = 0.04;
+
+/** USD → KRW 표시용 환율 (env KRW_PER_USD, 기본 1400) */
+export function krwPerUsd(): number {
+  const raw = process.env.KRW_PER_USD?.trim();
+  const n = raw ? Number(raw) : NaN;
+  return Number.isFinite(n) && n > 0 ? n : 1400;
+}
 
 const GATEWAY_TIMEOUT_MS = 6000;
 const CACHE_TTL_MS = 10 * 60 * 1000;

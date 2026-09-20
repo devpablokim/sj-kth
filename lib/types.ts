@@ -71,6 +71,8 @@ export interface PostAnalysis {
   benchmarkScore: number;
   /** 한 줄 요약 (질문 답변에서 규칙 기반으로 생성) */
   summary: string;
+  /** 0~1. 질문별 확신도 평균 (choice: 1위-2위 확률차, boolean: |p-0.5|*2, score: 최대 확률) */
+  confidence: number;
 }
 
 /** 생성된 시안(초안) 1건 */
@@ -101,7 +103,28 @@ export interface RunStats {
   postsPerSec: number;
   elapsedMs: number;
   costUsd: number;
+  /** costUsd × KRW_PER_USD (환율은 env, 기본 1400) */
+  costKrw: number;
   draftsGenerated: number;
+}
+
+/** jev/생성 모델 호출 1회의 원문 기록 — 대시보드 "CALL LOG" 패널용 (키·헤더는 절대 포함하지 않음) */
+export interface CallLogEntry {
+  id: string;
+  tag: "analyze" | "draft" | "draft_judge";
+  postId?: string;
+  /** 한 줄 요약 (예: "글로우랩 · question 훅 · CTA 3/4 · draft yes") */
+  summary: string;
+  /** 요청 원문 (state + questions 또는 프롬프트) */
+  request: unknown;
+  /** 응답 원문 (answers + usage 또는 생성 결과) */
+  response: unknown;
+  latencyMs: number;
+  usage: { inputTokens: number; outputTokens: number };
+  costUsd: number;
+  mode: "live" | "demo";
+  model: string;
+  at: number;
 }
 
 /** 서버 → 클라이언트 SSE 이벤트 */
@@ -113,6 +136,7 @@ export type RunEvent =
   | { type: "draft_start"; sourcePostId: string; at: number }
   | { type: "draft_result"; draft: Draft; stats: RunStats; at: number }
   | { type: "draft_error"; sourcePostId: string; message: string; stats: RunStats; at: number }
+  | { type: "call_log"; entry: CallLogEntry; at: number }
   | { type: "run_end"; stats: RunStats; at: number }
   | { type: "fatal"; message: string; at: number };
 
