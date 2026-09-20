@@ -13,7 +13,7 @@ Vercel AI Gateway 의 판정 모델 **`typesafe-ai/jev`** 로 대량·고속·�
 - 레퍼런스: <https://x.com/tarasshyn/status/2101012033340571952> — "JEV is INSANE. We gave it 3 million replay events. In 40 seconds, it watched 3,247 sessions, caught 132 rage clicks … All for just $2.17."
   이 데모의 화면 구성(스탯 타일 → 썸네일 모자이크 → 분석 중 패널 → 집계 → 드래프트 카드)을 **마케팅 콘텐츠 벤치마크**에 그대로 옮겼습니다.
 - 하는 일
-  1. 포스트 48건(샘플) 또는 붙여넣은 실데이터를 SSE 로 스트리밍하며 한 건씩 jev 에 판정을 맡깁니다.
+  1. 분석 대상(샘플 48건 · 카테고리 예시 생성 · 직접 붙여넣기 · YouTube 검색)을 SSE 로 스트리밍하며 한 건씩 jev 에 판정을 맡깁니다.
   2. 각 포스트에 대해 **형식 · 훅 유형 · 톤 · 페인포인트 · 사회적 증거 · 긴급성 · CTA 강도 · 명확성 · 재사용 가능성 · 시안 가치** 10개 질문에 답을 받습니다.
   3. 답변을 합쳐 `benchmarkScore`(0~100)를 매기고, 상위 N개에 대해 우리 브랜드 버전 시안을 생성한 뒤 **그 시안을 다시 jev 로 재판정**해 원본과의 구조 일치도(`matchScore`)를 보여줍니다.
 - **jev 는 텍스트 생성기가 아니라 판정(evaluation) 모델입니다.** 하나의 `state`(여기서는 포스트 1건)에 대해 `boolean` / `choice` / `score` 형태의 질문에 확률·분포로 답합니다.
@@ -67,6 +67,22 @@ npm run dev                 # http://localhost:3000
 
 ---
 
+## 사용법 (화면 기준)
+
+1. **우리 브랜드** — 브랜드명 · 카테고리 · 핵심 메시지를 입력합니다. 이 값은 "우리 브랜드 시안"을 쓸 때만 쓰이고 검색어로는 쓰이지 않습니다.
+2. **분석 대상** — 무엇을 벤치마크할지 고릅니다.
+   - `샘플 48건`: AI 전환 컨설팅 · 기업 AI 교육 카테고리의 가상 벤치마크 브랜드 6곳 — 카드뉴스 · 마케팅 문구 · 광고 소재 (데모용, 실제 기업 아님). 기본 '우리 브랜드' 예시는 하비탄AI(https://hobbytan.com)
+   - `카테고리 예시 생성`: 입력한 카테고리와 경쟁 브랜드명을 참고해 텍스트 모델이 벤치마크 스타일 포스트를 만듭니다. **실제 게시물이 아니며** 모든 타일에 `예시` 배지가 붙습니다. LIVE 모드 전용, 12건 약 $0.05 · 24건 약 $0.1 · 48건 약 $0.2.
+   - `직접 붙여넣기`: 경쟁사 인스타그램/스레드/X 캡션을 복사해 붙여넣습니다. 여러 개는 빈 줄 두 번 또는 `---` 로 구분. 원문 URL 을 함께 넣으면 상세 보기에서 바로 열립니다.
+   - `YouTube 검색`: `YOUTUBE_API_KEY` 가 있으면 검색어로 실제 영상(제목·설명·채널·조회수·썸네일)을 수집합니다.
+   - 고급: `Post[]` JSON 붙여넣기 — 형식은 [data/README.md](data/README.md).
+3. **RUN ANALYSIS** — 포스트마다 jev 가 질문 10개를 판정하고, 상위 N개(`DRAFTS`)는 자동으로 우리 브랜드 시안이 만들어집니다.
+4. **결과 보기** — 타일이나 `TOP BENCHMARKS` 행을 누르면 **상세 보기**(원문 전체 · 슬라이드 · 판정 막대 · 원문 링크 열기)가 열리고, 거기서 "이 포스트로 우리 브랜드 시안 만들기"를 누를 수 있습니다. 하단 `CALL LOG` 의 `JSON 펼침` 으로 호출별 요청/응답 원문을 볼 수 있습니다.
+
+API 요약: `POST /api/analyze`(SSE) · `POST /api/generate-set` · `GET /api/collect/youtube?q=&max=` · `POST /api/draft` · `GET /api/health`
+
+---
+
 ## Vercel 배포
 
 1. Vercel 에서 이 레포를 import 합니다 (Framework: Next.js, 추가 설정 없음).
@@ -105,6 +121,7 @@ npm run dev                 # http://localhost:3000
 | `KRW_PER_USD` | `1400` | 비용 타일의 ₩ 환산 환율 (표시용) |
 | `JEV_PRICE_INPUT_PER_M` | (비움) | jev 입력 토큰 단가 덮어쓰기 (USD / 1M tokens) |
 | `JEV_PRICE_OUTPUT_PER_M` | (비움) | jev 출력 토큰 단가 덮어쓰기 (USD / 1M tokens) |
+| `YOUTUBE_API_KEY` | (비움) | (선택) YouTube 검색 수집용 Google API 키 — YouTube Data API v3 활성화 필요 |
 
 ---
 
@@ -158,7 +175,7 @@ jev 공식 쇼케이스 데모 5개를 직접 돌리며 호출 93회의 요청/�
 ## 다음 단계
 
 - **수집기 연결** — `lib/ingest/{x,threads,youtube,instagram}.ts` 어댑터를 만들어 원본 → `Post[]` 변환. 원본은 `data/raw/`(gitignore) 에 보관. 자세한 제안은 [`data/README.md`](data/README.md).
-- **카테고리별 벤치마크 세트** — 지금은 "직장인 온라인 클래스 / 생산성 앱" 샘플 하나뿐. 카테고리마다 48~100건짜리 세트를 만들어 훅 유형·CTA 분포를 비교.
+- **카테고리별 벤치마크 세트** — 지금은 "AI 전환 컨설팅 · 기업 AI 교육" 샘플 하나뿐. 카테고리마다 48~100건짜리 세트를 만들어 훅 유형·CTA 분포를 비교.
 - **시안 A/B 판정** — 한 포스트에 시안을 2~3개 만들고 jev 에 `choice` 질문으로 "어느 쪽이 원본 구조에 더 가깝고 브랜드에 맞는가"를 물어 자동 선별.
 - 확신도 <0.5 인 판정을 따로 모아 사람이 검토하는 큐, 판정 결과 내보내기(CSV/JSON).
 

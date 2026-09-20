@@ -6,42 +6,15 @@
 import { z } from "zod";
 import type { RunEvent, RunRequest } from "@/lib/types";
 import { runPipeline, safeErrorMessage } from "@/lib/pipeline";
+import { brandSchema, postSchema } from "@/lib/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 300;
 
-const platformSchema = z.enum(["x", "threads", "youtube", "instagram"]);
-const formatSchema = z.enum(["card_news", "short_video", "long_video", "text", "thread", "image"]);
-
-const postSchema = z.object({
-  id: z.string().min(1).max(64),
-  platform: platformSchema,
-  brand: z.string().min(1).max(80),
-  handle: z.string().max(80).default(""),
-  url: z.string().max(500).default(""),
-  text: z.string().min(1).max(4000),
-  slides: z.array(z.string().max(1000)).max(12).optional(),
-  thumbnailUrl: z.string().max(500).optional(),
-  formatHint: formatSchema.optional(),
-  postedAt: z.string().max(40).optional(),
-  metrics: z
-    .object({
-      likes: z.number().nonnegative().optional(),
-      comments: z.number().nonnegative().optional(),
-      shares: z.number().nonnegative().optional(),
-      views: z.number().nonnegative().optional(),
-    })
-    .optional(),
-});
-
 const bodySchema = z.object({
   posts: z.array(postSchema).max(500).optional(),
-  brand: z.object({
-    name: z.string().max(80).default(""),
-    category: z.string().max(120).default(""),
-    positioning: z.string().max(300).default(""),
-  }),
+  brand: brandSchema,
   draftCount: z.number().int().min(0).max(10).default(3),
   demo: z.boolean().optional(),
 });

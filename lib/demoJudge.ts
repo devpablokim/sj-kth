@@ -292,8 +292,8 @@ function withRo(word: string): string {
 export function demoDraft({ post, analysis, brand }: DemoDraftInput): DemoDraftOutput {
   const rand = seededRandom(`draft:${post.id}:${brand.name}`);
   const name = brand.name.trim() || "우리 브랜드";
-  const category = brand.category.trim() || "온라인 클래스";
-  const positioning = brand.positioning.trim() || "바쁜 직장인을 위한 가장 짧은 성장 루틴";
+  const category = brand.category.trim() || "AI 전환 교육";
+  const positioning = brand.positioning.trim() || "우리 팀이 직접 만들고 관리하는 AI 전환";
 
   const hook = analysis.answers.hook_type;
   const hookType = hook.type === "choice" ? hook.choice : "none";

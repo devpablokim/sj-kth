@@ -3,6 +3,7 @@
  * `data: {json}` 라인이 빈 줄로 구분되어 오며, 청크가 중간에 잘릴 수 있어 버퍼링 후 파싱합니다.
  * 상태: mode, posts, analyses(Map), current, stats, drafts, errors, status(idle|running|done|error),
  * calls(jev/생성 모델 호출 원문 로그 — 최대 500개, clearCalls() 로 비움).
+ * addDraft / addCalls — 실행 밖에서(PostDrawer 의 "이 포스트로 시안 만들기") 만든 시안과 호출 로그를 같은 상태에 합칩니다.
  */
 "use client";
 
@@ -64,7 +65,9 @@ type Action =
   | { type: "stopped"; at: number }
   | { type: "stream_end"; at: number }
   | { type: "set_posts"; posts: Post[] }
-  | { type: "clear_calls" };
+  | { type: "clear_calls" }
+  | { type: "add_draft"; draft: Draft }
+  | { type: "add_calls"; entries: CallLogEntry[] };
 
 function initialState(posts: Post[]): RunState {
   return {
@@ -111,6 +114,23 @@ function reduce(state: RunState, action: Action): RunState {
       };
     case "clear_calls":
       return { ...state, calls: [] };
+    case "add_draft": {
+      // 같은 id 가 있으면 교체, 없으면 뒤에 추가 (새 시안일 때만 draftsGenerated 증가)
+      const exists = state.drafts.some((d) => d.id === action.draft.id);
+      const drafts = exists
+        ? state.drafts.map((d) => (d.id === action.draft.id ? action.draft : d))
+        : [...state.drafts, action.draft];
+      return {
+        ...state,
+        drafts,
+        stats: { ...state.stats, draftsGenerated: exists ? state.stats.draftsGenerated : state.stats.draftsGenerated + 1 },
+      };
+    }
+    case "add_calls": {
+      if (action.entries.length === 0) return state;
+      const merged = [...state.calls, ...action.entries];
+      return { ...state, calls: merged.length > MAX_CALLS ? merged.slice(merged.length - MAX_CALLS) : merged };
+    }
     case "client_error":
       return {
         ...state,
@@ -290,6 +310,14 @@ export function useRun(initialPosts: Post[]) {
     dispatch({ type: "clear_calls" });
   }, []);
 
+  const addDraft = useCallback((draft: Draft) => {
+    dispatch({ type: "add_draft", draft });
+  }, []);
+
+  const addCalls = useCallback((entries: CallLogEntry[]) => {
+    dispatch({ type: "add_calls", entries });
+  }, []);
+
   const start = useCallback(
     async (request: RunRequest, fallbackPosts: Post[]) => {
       abortRef.current?.abort();
@@ -359,5 +387,5 @@ export function useRun(initialPosts: Post[]) {
     [],
   );
 
-  return { state, start, stop, setPosts, clearCalls };
+  return { state, start, stop, setPosts, clearCalls, addDraft, addCalls };
 }
