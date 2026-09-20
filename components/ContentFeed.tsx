@@ -2,6 +2,8 @@
  * ContentFeed — 좌측 큰 패널. "CONTENT FEED  {analyzed} / {total}" 헤더와
  * 포스트 타일 모자이크(포스트 수에 따라 6~8열). 분석 중인 타일은 빨간 테두리, 완료 타일은 살짝 어둡게 + 체크.
  * 아래에는 "TOP BENCHMARKS" — 벤치마크 점수 상위 포스트 순위표(따라 할 가치가 큰 순).
+ * 타일/순위 클릭은 onSelect(postId) 로만 올리고, 무엇을 열지(상세 드로어)는 Dashboard 가 정합니다.
+ * AI 생성 예시 세트면 헤더 우측에 "AI 생성 예시 · 실제 게시물 아님" 표시.
  */
 "use client";
 
@@ -29,6 +31,7 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
     return "idle";
   };
   const cols = posts.length > 60 ? "grid-cols-8" : posts.length > 24 ? "grid-cols-6" : "grid-cols-4";
+  const generated = posts.some((p) => p.generated);
   const postById = new Map(posts.map((p) => [p.id, p]));
   const ranked = [...analyses.values()]
     .sort((a, b) => b.benchmarkScore - a.benchmarkScore)
@@ -39,15 +42,22 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
 
   return (
     <section className="panel flex min-h-0 flex-col p-3" aria-label="콘텐츠 피드">
-      <div className="mb-2.5 flex items-center justify-between">
+      <div className="mb-2.5 flex items-center justify-between gap-2">
         <span className="label">content feed</span>
-        <span className="label tabular">
-          {fmtInt(analyses.size)} / {fmtInt(posts.length)}
+        <span className="flex min-w-0 items-center gap-2">
+          {generated && (
+            <span className="truncate text-[10px] text-muted" title="AI 가 카테고리 예시로 만든 포스트 — 실제 게시물이 아닙니다">
+              AI 생성 예시 · 실제 게시물 아님
+            </span>
+          )}
+          <span className="label tabular shrink-0">
+            {fmtInt(analyses.size)} / {fmtInt(posts.length)}
+          </span>
         </span>
       </div>
       {posts.length === 0 ? (
         <div className="flex flex-1 items-center justify-center py-16 text-[12px] text-muted">
-          표시할 포스트가 없습니다. LOAD POSTS JSON 으로 불러오거나 샘플을 사용하세요.
+          표시할 포스트가 없습니다. 위 '분석 대상'에서 불러오거나 샘플을 사용하세요.
         </div>
       ) : (
         <div className={`thin-scroll grid max-h-[560px] ${cols} gap-[5px] overflow-y-auto pr-0.5`} role="list">
