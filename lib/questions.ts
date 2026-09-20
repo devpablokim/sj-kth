@@ -1,5 +1,5 @@
 import type { Experimental_EvaluationQuestion as EvaluationQuestion } from "ai";
-import type { QuestionId } from "./types";
+import type { PostFormat, QuestionId } from "./types";
 
 /**
  * jev(typesafe-ai/jev)에 던지는 질문 세트.
@@ -7,6 +7,11 @@ import type { QuestionId } from "./types";
  * jev 는 "생성" 모델이 아니라 "판정(evaluation)" 모델입니다.
  * 하나의 state(포스트 1건)에 대해 boolean / choice / score 형태의 질문에
  * 확률·분포로 답합니다. 질문을 바꾸면 lib/types.ts 의 QuestionId 도 함께 갱신하세요.
+ *
+ * 설계 원칙 (TypeSafe 공식 가이드 · 커뮤니티 패턴):
+ *  - 원자적 질문(atomic): 한 질문에 한 판단만. 조합·가중치·임계값은 코드가 소유 (lib/scoring.ts)
+ *  - 투기적 팬아웃(speculative fan-out): 필요할 법한 질문을 한 호출에 모두 묻고 코드에서 골라 씀
+ *  - choice 에는 "none/other/uncertain" 같은 탈출구를 둬서 억지 분류를 막음 (abstention)
  */
 export const QUESTIONS = {
   format: {
@@ -144,3 +149,147 @@ export const QUESTION_ORDER: QuestionId[] = [
   "imitability",
   "make_draft",
 ];
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * 관문(gate) 질문 — 수집된 실제 게시물이 "우리 카테고리의 마케팅/브랜드 콘텐츠"인지 먼저 거릅니다.
+ * (RAG passage filtering · semantic re-ranking 패턴: 싼 판정으로 후보를 거르고, 남은 것만 본 판정)
+ * state 에는 our_category 와 post 가 함께 들어갑니다.
+ * ──────────────────────────────────────────────────────────────────────────── */
+export const GATE_QUESTIONS = {
+  relevant: {
+    type: "boolean",
+    instructions:
+      "post 가 our_category(우리 브랜드의 카테고리)와 같은 시장·주제를 다루는 콘텐츠인가요? 경쟁사·벤치마크로 참고할 만한 관련 게시물이면 true, 전혀 다른 주제나 개인 잡담이면 false.",
+    criteria: {
+      true: "같은 카테고리의 상품·서비스·교육·정보를 다루며 벤치마크로 참고할 수 있음",
+      false: "카테고리와 무관하거나(다른 업종·개인사·일반 뉴스) 참고 가치가 없음",
+    },
+  },
+  kind: {
+    type: "choice",
+    instructions: "post 의 성격을 고르세요. 판단이 어려우면 uncertain 을 고르세요.",
+    criteria: {
+      marketing: "상품·서비스·강의·행사를 알리거나 신청·문의·구매를 유도하는 브랜드 마케팅 콘텐츠",
+      educational: "정보·팁·인사이트를 전달하는 브랜드/전문가 콘텐츠 (직접 판매 유도는 약함)",
+      personal: "개인의 일상·감상·의견 (브랜드 마케팅 아님)",
+      news: "뉴스·보도·공식 발표 요약",
+      spam: "스팸·무관한 광고·낚시",
+      uncertain: "위 어디에도 확실히 넣기 어려움",
+    },
+  },
+} as const satisfies Record<string, EvaluationQuestion>;
+
+/* ────────────────────────────────────────────────────────────────────────────
+ * 2단계(계층) 분류 — 형식이 정해진 뒤 형식별 세부 구조를 묻습니다 (hierarchical classification 패턴).
+ * 100개 옵션을 한 번에 묻지 않고, 1단계 답(format)에 따라 옵션 집합을 바꿉니다.
+ * ──────────────────────────────────────────────────────────────────────────── */
+type StructureQuestion = { type: "choice"; instructions: string; criteria: Record<string, string> };
+
+const STRUCTURE_BASE = "1단계에서 이 포스트의 형식은 format 으로 판정되었습니다. 그 형식 안에서 콘텐츠의 '구조 유형'을 고르세요. 확실하지 않으면 other.";
+
+export const STRUCTURE_QUESTIONS: Record<PostFormat, StructureQuestion> = {
+  card_news: {
+    type: "choice",
+    instructions: `${STRUCTURE_BASE} (카드뉴스)`,
+    criteria: {
+      list: "리스트형 — 'N가지', 항목을 카드마다 하나씩",
+      story: "스토리형 — 사례·경험을 순서대로 전개",
+      before_after: "비포/애프터 — 문제 상황 → 해결 후 변화",
+      checklist: "체크리스트/진단 — 해당 여부를 스스로 점검",
+      qna: "Q&A / 오해와 진실",
+      announcement: "공지형 — 행사·모집·출시 안내 카드",
+      other: "그 외",
+    },
+  },
+  short_video: {
+    type: "choice",
+    instructions: `${STRUCTURE_BASE} (숏폼 영상)`,
+    criteria: {
+      talking_head: "한 사람이 카메라를 보고 말하는 토킹헤드",
+      tutorial: "화면·도구를 보여주며 따라 하는 튜토리얼",
+      skit: "상황극·콩트",
+      testimonial: "고객·수강생 후기/인터뷰",
+      montage: "현장·이벤트 몽타주",
+      other: "그 외",
+    },
+  },
+  long_video: {
+    type: "choice",
+    instructions: `${STRUCTURE_BASE} (롱폼 영상)`,
+    criteria: {
+      lecture: "강의·설명 (한 주제를 체계적으로)",
+      interview: "인터뷰·대담",
+      case_study: "사례·프로젝트 리뷰",
+      webinar: "웨비나·세미나 녹화",
+      vlog: "브이로그·현장 기록",
+      other: "그 외",
+    },
+  },
+  text: {
+    type: "choice",
+    instructions: `${STRUCTURE_BASE} (텍스트 포스트)`,
+    criteria: {
+      listicle: "리스트형 — 항목 나열",
+      story: "스토리형 — 경험담·사례",
+      opinion: "주장/인사이트형",
+      announcement: "공지·모집형",
+      qna: "질문·답변형 (댓글 유도)",
+      other: "그 외",
+    },
+  },
+  thread: {
+    type: "choice",
+    instructions: `${STRUCTURE_BASE} (연속 스레드)`,
+    criteria: {
+      listicle: "리스트형 — 스레드마다 항목 하나",
+      story: "스토리형 — 순서대로 전개",
+      opinion: "주장/인사이트형",
+      how_to: "단계별 가이드",
+      other: "그 외",
+    },
+  },
+  image: {
+    type: "choice",
+    instructions: `${STRUCTURE_BASE} (단일 이미지)`,
+    criteria: {
+      quote: "한 줄 문구/명언 이미지",
+      poster: "행사·모집 포스터",
+      product: "상품·서비스 소개 이미지",
+      meme: "밈·유머 이미지",
+      infographic: "인포그래픽·도표",
+      other: "그 외",
+    },
+  },
+};
+
+/** 세부 구조 옵션 → 한국어 라벨 (UI) */
+export const STRUCTURE_LABEL_KO: Record<string, string> = {
+  list: "리스트형",
+  listicle: "리스트형",
+  story: "스토리형",
+  before_after: "비포/애프터",
+  checklist: "체크리스트",
+  qna: "Q&A",
+  announcement: "공지형",
+  talking_head: "토킹헤드",
+  tutorial: "튜토리얼",
+  skit: "상황극",
+  testimonial: "후기",
+  montage: "몽타주",
+  lecture: "강의",
+  interview: "인터뷰",
+  case_study: "사례",
+  webinar: "웨비나",
+  vlog: "브이로그",
+  opinion: "인사이트",
+  how_to: "가이드",
+  quote: "문구",
+  poster: "포스터",
+  product: "상품 소개",
+  meme: "밈",
+  infographic: "인포그래픽",
+  other: "기타",
+};
+
+/** 자기일관성 재검사에 다시 묻는 핵심 질문 (self-consistency 패턴 — 답이 흔들리면 검토 신호) */
+export const RECHECK_IDS: QuestionId[] = ["format", "hook_type", "make_draft"];

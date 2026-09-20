@@ -1,7 +1,7 @@
 /*
  * HelpPanel — Header 아래 "HOW TO USE · 사용법" 접이식 패널.
  * ① 분석 대상 고르기 ② RUN ANALYSIS ③ 결과 보기 3단계(폰 1열 / sm 이상 3열)와
- * "브랜드 입력값은 시안 생성에만 쓰인다"는 안내. 접힘 상태는 localStorage(jev.help.collapsed)에 기억합니다(기본: 펼침).
+ * 무료 수집의 한계 · 브랜드 입력값 용도 안내. 접힘 상태는 localStorage(jev.help.collapsed)에 기억합니다(기본: 펼침).
  */
 "use client";
 
@@ -44,21 +44,21 @@ const serverSnapshot = () => false;
 const STEPS: ReadonlyArray<{ n: string; title: string; body: string }> = [
   {
     n: "①",
-    title: "분석 대상 고르기",
+    title: "실제 게시물 수집 (무료, 기본)",
     body:
-      "샘플로 먼저 체험하거나, '카테고리 예시 생성'으로 내 업종에 맞는 예시를 만들거나, 경쟁사 캡션을 '직접 붙여넣기'하세요. YouTube 검색은 API 키가 있으면 실제 영상을 가져옵니다.",
+      "검색어(기본값은 카테고리)로 YouTube · Threads 를 검색하고, 벤치마크 계정(@handle)과 게시물 URL(X · Threads · Instagram · YouTube)을 넣으면 API 키 없이 공개 페이지에서 실제 게시물을 가져옵니다. 경로별 성공/실패가 그대로 표시됩니다.",
   },
   {
     n: "②",
-    title: "RUN ANALYSIS",
+    title: "수집 후 분석 실행",
     body:
-      "jev 가 포스트마다 10가지(형식·훅·CTA·페인포인트·사회적 증거·긴급성·톤·명확성·재사용성·시안 가치)를 판정합니다. 48건에 수 초, 비용은 수십 원 수준.",
+      "jev 가 먼저 '우리 카테고리와 관련된 마케팅 콘텐츠인가'를 걸러(관문) 무관한 글을 제외하고, 남은 포스트마다 10가지 질문 + 형식별 세부 구조를 판정합니다. 확신도가 낮으면 한 번 더 물어 답이 흔들리는지 확인합니다.",
   },
   {
     n: "③",
-    title: "결과 보기",
+    title: "결과 보기 · 시안",
     body:
-      "타일이나 TOP BENCHMARKS 를 누르면 상세 보기(원문·판정·원문 링크)가 열리고, 거기서 우리 브랜드 시안을 만들 수 있습니다. 상위 N개는 자동으로 시안이 생성됩니다.",
+      "타일이나 TOP BENCHMARKS 를 누르면 상세 보기(원문 · 판정 · 원문 링크)가 열립니다. 상위 N개는 우리 브랜드 시안이 자동 생성되고, 시안마다 브랜드 안전 · 표시광고 위험 · 타깃 적합 · 포지셔닝 모순 · 완성도를 심사해 승인/검토/차단을 표시합니다.",
   },
 ];
 
@@ -98,7 +98,8 @@ export default function HelpPanel() {
             ))}
           </ol>
           <p className="mt-2.5 border-t border-line pt-2 text-[11px] leading-snug text-muted">
-            브랜드명·카테고리·핵심 메시지는 시안 생성에만 쓰이고 검색어로는 쓰이지 않습니다.
+            무료 수집의 한계: X 는 게시물 URL 단위(계정 타임라인은 X 가 자주 막음), Instagram 은 게시물 URL 단위(계정 조회는 자주 차단)로만 안정적입니다. 키워드 검색은
+            YouTube · Threads 에서 됩니다. 브랜드명·카테고리·핵심 메시지는 관문 판정(관련성)과 시안 생성에 쓰이며, 카테고리는 검색어 기본값이 됩니다.
           </p>
         </div>
       )}

@@ -23,6 +23,11 @@ export function draftModelId(): string {
   return process.env.DRAFT_MODEL?.trim() || DEFAULT_DRAFT_MODEL;
 }
 
+function flag(name: string): boolean {
+  const v = process.env[name]?.trim().toLowerCase();
+  return v === "1" || v === "true";
+}
+
 /**
  * 데모 모드 판단:
  *  - JEV_DEMO_MODE=1 이면 항상 데모
@@ -31,7 +36,17 @@ export function draftModelId(): string {
  */
 export function resolveMode(requestDemo?: boolean): "live" | "demo" {
   if (requestDemo) return "demo";
-  const flag = process.env.JEV_DEMO_MODE?.trim();
-  if (flag === "1" || flag?.toLowerCase() === "true") return "demo";
+  if (flag("JEV_DEMO_MODE")) return "demo";
   return hasGatewayKey() ? "live" : "demo";
+}
+
+/** JEV_ZERO_DATA_RETENTION=1 이면 모든 jev 호출에 gateway zeroDataRetention 옵션을 붙입니다 */
+export function zeroDataRetention(): boolean {
+  return flag("JEV_ZERO_DATA_RETENTION");
+}
+
+/** (선택) Jina Reader API 키 — 없으면 익명 한도(분당 20회)로 동작 */
+export function jinaApiKey(): string | undefined {
+  const k = process.env.JINA_API_KEY?.trim();
+  return k ? k : undefined;
 }

@@ -71,8 +71,13 @@ export default function StatTiles({ stats, elapsedMs, costIsEstimate }: Props) {
     <div className="flex flex-wrap items-stretch justify-between gap-2">
       <div className="grid w-full grid-cols-3 gap-2 sm:w-auto">
         <Tile label="posts read" value={fmtInt(stats.postsRead)} dark hint="판정을 시작한 포스트 수" />
-        <Tile label="checks run" value={fmtInt(stats.checksRun)} dark hint="포스트 × 질문 수" />
-        <Tile label="posts analyzed" value={fmtInt(stats.postsAnalyzed)} hint="판정이 끝난 포스트 수" />
+        <Tile label="checks run" value={fmtInt(stats.checksRun)} dark hint="jev 에 물은 질문 수 (관문 2 · 본 판정 10 · 구조 1 · 재검사 3 · 시안 심사 8)" />
+        <Tile
+          label="posts analyzed"
+          value={fmtInt(stats.postsAnalyzed)}
+          hint="판정이 끝난 포스트 수 · 관문에서 제외된 수 · 검토 권장(확신도 낮음) 수"
+          sub={stats.postsExcluded || stats.postsReview ? `excluded ${fmtInt(stats.postsExcluded)} · review ${fmtInt(stats.postsReview)}` : undefined}
+        />
       </div>
       <div className="grid w-full grid-cols-3 gap-2 sm:w-auto">
         <Tile label="posts / sec" value={fmtFixed(stats.postsPerSec, 1)} hint="초당 판정 처리량" />

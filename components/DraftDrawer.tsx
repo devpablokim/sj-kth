@@ -1,12 +1,13 @@
 /*
  * DraftDrawer — 시안 상세 슬라이드오버(우측 고정 520px). 위: 원본(벤치마크) 포스트,
- * 아래: 우리 브랜드 시안(headline · body · slides · meta). 복사 / 닫기 버튼, 배경 클릭·Esc 로 닫힘.
+ * 가운데: 우리 브랜드 시안(headline · body · slides · meta), 아래: jev 적합성 심사(승인/검토/차단 · 5개 지표 · 사유).
+ * 복사 / 닫기 버튼, 배경 클릭·Esc 로 닫힘.
  */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { Draft, Post } from "@/lib/types";
-import { fmtScorePct } from "@/lib/format";
+import type { Draft, DraftReview, Post } from "@/lib/types";
+import { fmtPct, fmtScorePct } from "@/lib/format";
 import { FORMAT_LABEL_KO } from "@/lib/scoring";
 import PostTile, { PLATFORM_NAME } from "./PostTile";
 
@@ -26,6 +27,40 @@ function toPlainText(d: Draft): string {
 }
 
 const btnCls = "label h-8 rounded-[4px] border px-3 !text-[10px] transition-colors";
+
+const DECISION: Record<DraftReview["decision"], { text: string; cls: string; hint: string }> = {
+  approve: { text: "승인", cls: "border-ok bg-ok text-white", hint: "안전 · 표현 · 타깃 · 포지셔닝 모두 통과 — 그대로 써도 됨" },
+  review: { text: "검토", cls: "border-line bg-page text-ink", hint: "게시 전에 사람이 한 번 확인" },
+  block: { text: "차단", cls: "border-accent bg-accent text-white", hint: "브랜드 안전 · 표시광고 · 포지셔닝 중 하나가 위험 — 수정 필요" },
+};
+
+/** 심사 지표 행 — 값이 좋을수록(안전·적합·품질 ↑, 위험·모순 ↓) 검정, 나쁘면 빨강 점선 */
+function ReviewRows({ review }: { review: DraftReview }) {
+  const rows: Array<{ label: string; value: string; pct: number; bad: boolean; hint: string }> = [
+    { label: "brand safety", value: fmtPct(review.brandSafety), pct: review.brandSafety, bad: review.brandSafety < 0.5, hint: "비하·혐오·비방 등이 없을 확률" },
+    { label: "claim risk", value: fmtPct(review.claimRisk), pct: review.claimRisk, bad: review.claimRisk >= 0.4, hint: "최상급·보장·근거 없는 수치 등 표시광고 위험 표현이 있을 확률" },
+    { label: "audience", value: fmtPct(review.audienceMatch), pct: review.audienceMatch, bad: review.audienceMatch < 0.5, hint: "타깃 고객에게 맞는 말투·내용일 확률" },
+    { label: "contradiction", value: fmtPct(review.contradictsPositioning), pct: review.contradictsPositioning, bad: review.contradictsPositioning >= 0.4, hint: "우리 포지셔닝과 모순될 확률" },
+    { label: "quality", value: `${review.quality.toFixed(1)} / ${review.qualityMax}`, pct: review.qualityMax > 0 ? review.quality / review.qualityMax : 0, bad: review.quality < 1.5, hint: "지금 그대로 게시해도 되는 완성도" },
+  ];
+  return (
+    <div role="table" aria-label="시안 심사 지표">
+      {rows.map((r) => (
+        <div key={r.label} role="row" className="flex h-[22px] items-center gap-2 border-b border-line last:border-b-0" title={r.hint}>
+          <span role="rowheader" className="label w-[84px] shrink-0 truncate">
+            {r.label}
+          </span>
+          <span role="cell" className={`w-[64px] shrink-0 text-[11px] leading-none ${r.bad ? "text-accent" : "text-ink"}`}>
+            {r.value}
+          </span>
+          <span role="cell" className="bar-track min-w-0 flex-1">
+            <span className={r.bad ? "bar-dashed" : "bar"} style={{ width: `${Math.max(0, Math.min(1, r.pct)) * 100}%` }} />
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
 
 export default function DraftDrawer({ draft, sourcePost, onClose }: Props) {
   const [copied, setCopied] = useState(false);
@@ -150,6 +185,33 @@ export default function DraftDrawer({ draft, sourcePost, onClose }: Props) {
               {PLATFORM_NAME[draft.platform]} · {formatKo} · match{" "}
               <span className="font-bold text-accent">{fmtScorePct(draft.matchScore)}</span> · {draft.model}
             </div>
+          </section>
+
+          {/* 심사 */}
+          <section aria-label="시안 심사" className="border-t border-line pt-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="label">review · jev 적합성 심사</span>
+              {draft.review && (
+                <span className={`label inline-flex h-[18px] items-center rounded-[3px] border px-2 !text-[9px] ${DECISION[draft.review.decision].cls}`} title={DECISION[draft.review.decision].hint}>
+                  {DECISION[draft.review.decision].text}
+                </span>
+              )}
+            </div>
+            {draft.review ? (
+              <div className="flex flex-col gap-2">
+                <ReviewRows review={draft.review} />
+                <ul className="flex flex-col gap-0.5 text-[11px] leading-snug text-muted">
+                  {draft.review.reasons.map((r) => (
+                    <li key={r}>· {r}</li>
+                  ))}
+                </ul>
+                <p className="text-[10px] leading-snug text-faint">
+                  jev 가 시안을 보고 브랜드 안전 · 표시광고 위험 표현 · 타깃 적합 · 포지셔닝 모순 · 완성도를 판정하고, 승인/검토/차단 규칙은 코드가 정합니다 (차단: 안전 &lt; 50% · 위험 표현 ≥ 70% · 모순 ≥ 70%).
+                </p>
+              </div>
+            ) : (
+              <p className="text-[12px] text-muted">이 시안은 심사 결과가 없습니다 (이전 버전에서 만든 시안).</p>
+            )}
           </section>
         </div>
 

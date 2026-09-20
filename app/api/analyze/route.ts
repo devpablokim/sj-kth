@@ -1,12 +1,12 @@
 /**
  * POST /api/analyze — 실행 요청을 받아 파이프라인 이벤트를 SSE(text/event-stream)로 흘려보냅니다.
- * 본문은 zod 로 검증(포스트 최대 500개, 텍스트 최대 4000자). 클라이언트가 끊으면 파이프라인을 중단합니다.
+ * 본문은 zod 로 검증(포스트 최대 500개, 텍스트 최대 4000자, 판정 옵션). 클라이언트가 끊으면 파이프라인을 중단합니다.
  * API 키는 서버에서만 읽으며 어떤 이벤트에도 포함되지 않습니다.
  */
 import { z } from "zod";
 import type { RunEvent, RunRequest } from "@/lib/types";
 import { runPipeline, safeErrorMessage } from "@/lib/pipeline";
-import { brandSchema, postSchema } from "@/lib/schemas";
+import { brandSchema, judgeOptionsSchema, postSchema } from "@/lib/schemas";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -17,6 +17,7 @@ const bodySchema = z.object({
   brand: brandSchema,
   draftCount: z.number().int().min(0).max(10).default(3),
   demo: z.boolean().optional(),
+  options: judgeOptionsSchema,
 });
 
 const HEARTBEAT_MS = 15_000;

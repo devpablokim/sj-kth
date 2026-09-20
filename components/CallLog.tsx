@@ -41,12 +41,18 @@ function safeJson(value: unknown): string {
 }
 
 const TAG_CLS: Record<CallLogEntry["tag"], string> = {
+  gate: "border-line text-ink",
   analyze: "border-ink bg-ink text-white",
-  draft: "border-accent text-accent",
+  structure: "border-line text-muted",
+  recheck: "border-accent text-accent",
+  draft: "border-accent bg-accent text-white",
   draft_judge: "border-line text-muted",
 };
 const TAG_TEXT: Record<CallLogEntry["tag"], string> = {
+  gate: "gate",
   analyze: "analyze",
+  structure: "structure",
+  recheck: "recheck",
   draft: "draft",
   draft_judge: "judge",
 };
