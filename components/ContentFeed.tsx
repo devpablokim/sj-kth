@@ -1,40 +1,47 @@
 /*
  * ContentFeed — 좌측 큰 패널. "CONTENT FEED  {analyzed} / {total}" 헤더와
- * 포스트 타일 모자이크(포스트 수에 따라 6~8열). 분석 중인 타일은 빨간 테두리, 완료 타일은 살짝 어둡게 + 체크.
- * 아래에는 "TOP BENCHMARKS" — 벤치마크 점수 상위 포스트 순위표(따라 할 가치가 큰 순).
+ * 포스트 타일 모자이크(포스트 수에 따라 4~8열). 분석 중인 타일은 빨간 테두리, 완료 타일은 살짝 어둡게 + 체크,
+ * 관문에서 제외된 타일은 반투명 + "제외", 확신도가 낮은 타일은 "검토"/"불확실" 뱃지.
+ * 아래에는 "TOP BENCHMARKS" — 벤치마크 점수 상위 포스트 순위표(따라 할 가치가 큰 순, auto 구간 우선).
  * 타일/순위 클릭은 onSelect(postId) 로만 올리고, 무엇을 열지(상세 드로어)는 Dashboard 가 정합니다.
- * AI 생성 예시 세트면 헤더 우측에 "AI 생성 예시 · 실제 게시물 아님" 표시.
  */
 "use client";
 
-import type { Post, PostAnalysis } from "@/lib/types";
+import type { GateResult, Post, PostAnalysis } from "@/lib/types";
 import { fmtInt, truncate } from "@/lib/format";
+import { BAND_LABEL_KO } from "@/lib/scoring";
 import PostTile, { PLATFORM_NAME, type TileStatus } from "./PostTile";
 
 interface Props {
   posts: Post[];
   analyses: Map<string, PostAnalysis>;
+  skipped: Map<string, GateResult>;
   inFlight: string[];
   errorIds: Set<string>;
   selectedId: string | null;
   onSelect: (postId: string) => void;
+  /** 포스트가 하나도 없을 때 안내 문구 */
+  emptyHint?: string;
 }
 
 const TOP_N = 8;
+const BAND_RANK = { auto: 0, review: 1, uncertain: 2 } as const;
 
-export default function ContentFeed({ posts, analyses, inFlight, errorIds, selectedId, onSelect }: Props) {
+export default function ContentFeed({ posts, analyses, skipped, inFlight, errorIds, selectedId, onSelect, emptyHint }: Props) {
   const inFlightSet = new Set(inFlight);
   const statusOf = (id: string): TileStatus => {
     if (inFlightSet.has(id)) return "analyzing";
     if (analyses.has(id)) return "done";
+    if (skipped.has(id)) return "skipped";
     if (errorIds.has(id)) return "error";
     return "idle";
   };
   const cols = posts.length > 60 ? "grid-cols-8" : posts.length > 24 ? "grid-cols-6" : "grid-cols-4";
   const generated = posts.some((p) => p.generated);
+  const real = posts.length > 0 && posts.every((p) => p.source === "collected" || p.source === "youtube");
   const postById = new Map(posts.map((p) => [p.id, p]));
   const ranked = [...analyses.values()]
-    .sort((a, b) => b.benchmarkScore - a.benchmarkScore)
+    .sort((a, b) => BAND_RANK[a.band] - BAND_RANK[b.band] || b.benchmarkScore - a.benchmarkScore)
     .slice(0, TOP_N)
     .map((a) => ({ a, post: postById.get(a.postId) }))
     .filter((r): r is { a: PostAnalysis; post: Post } => Boolean(r.post));
@@ -50,20 +57,31 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
               AI 생성 예시 · 실제 게시물 아님
             </span>
           )}
+          {real && (
+            <span className="truncate text-[10px] text-muted" title="공개 페이지에서 API 키 없이 수집한 실제 게시물">
+              실제 게시물 · 무료 수집
+            </span>
+          )}
+          {skipped.size > 0 && (
+            <span className="truncate text-[10px] text-muted" title="관문 판정에서 카테고리와 무관하다고 본 포스트">
+              제외 {fmtInt(skipped.size)}
+            </span>
+          )}
           <span className="label tabular shrink-0">
             {fmtInt(analyses.size)} / {fmtInt(posts.length)}
           </span>
         </span>
       </div>
       {posts.length === 0 ? (
-        <div className="flex flex-1 items-center justify-center py-16 text-[12px] text-muted">
-          표시할 포스트가 없습니다. 위 &lsquo;분석 대상&rsquo;에서 불러오거나 샘플을 사용하세요.
+        <div className="flex flex-1 items-center justify-center px-6 py-16 text-center text-[12px] leading-relaxed text-muted">
+          {emptyHint ?? "표시할 포스트가 없습니다. 위 '분석 대상'에서 불러오거나 샘플을 사용하세요."}
         </div>
       ) : (
         <div className={`thin-scroll grid max-h-[560px] ${cols} gap-[5px] overflow-y-auto pr-0.5`} role="list">
           {posts.map((post) => {
             const st = statusOf(post.id);
             const a = analyses.get(post.id);
+            const g = skipped.get(post.id);
             return (
               <div
                 key={post.id}
@@ -73,11 +91,14 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
                 <PostTile
                   post={post}
                   status={st}
+                  band={a?.band}
                   onClick={() => onSelect(post.id)}
                   title={
                     a
-                      ? `${post.brand} · ${a.summary} · 벤치마크 ${Math.round(a.benchmarkScore)}점`
-                      : undefined
+                      ? `${post.brand} · ${a.summary} · 벤치마크 ${Math.round(a.benchmarkScore)}점 · ${BAND_LABEL_KO[a.band]}`
+                      : g
+                        ? `${post.brand} · 관문 제외: ${g.reason}`
+                        : undefined
                   }
                 />
               </div>
@@ -93,7 +114,7 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
           <span className="label tabular">{ranked.length ? `${ranked.length} / ${analyses.size}` : "—"}</span>
         </div>
         {ranked.length === 0 ? (
-          <p className="py-3 text-[11px] text-muted">판정이 끝난 포스트 중 벤치마크 점수 상위 {TOP_N}개가 여기에 순서대로 쌓입니다.</p>
+          <p className="py-3 text-[11px] text-muted">판정이 끝난 포스트 중 벤치마크 점수 상위 {TOP_N}개가 여기에 순서대로 쌓입니다 (자동 채택 구간 우선).</p>
         ) : (
           <ol className="flex flex-col">
             {ranked.map(({ a, post }, i) => {
@@ -108,7 +129,7 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
                       "grid w-full grid-cols-[18px_44px_minmax(0,1fr)_120px_34px] items-center gap-2 py-[5px] text-left",
                       selectedId === post.id ? "bg-[#fafaf8]" : "hover:bg-[#fafaf8]",
                     ].join(" ")}
-                    aria-label={`${i + 1}위 ${post.brand} · 벤치마크 ${a.benchmarkScore}점`}
+                    aria-label={`${i + 1}위 ${post.brand} · 벤치마크 ${a.benchmarkScore}점 · ${BAND_LABEL_KO[a.band]}`}
                   >
                     <span className="label tabular !text-[9px]">{String(i + 1).padStart(2, "0")}</span>
                     <span className="w-11">
@@ -120,6 +141,9 @@ export default function ContentFeed({ posts, analyses, inFlight, errorIds, selec
                         <span className="ml-1 font-normal text-muted">
                           @{post.handle.replace(/^@/, "")} · {PLATFORM_NAME[post.platform]}
                         </span>
+                        {a.band !== "auto" && (
+                          <span className={`ml-1 font-normal ${a.band === "uncertain" ? "text-accent" : "text-muted"}`}>· {BAND_LABEL_KO[a.band]}</span>
+                        )}
                       </span>
                       <span className="block truncate text-[10px] leading-tight text-muted">{truncate(a.summary, 70)}</span>
                     </span>

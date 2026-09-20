@@ -1,15 +1,15 @@
 /*
  * PostTile — 모자이크 한 칸. thumbnailUrl 이 있으면 이미지(+하단 그라데이션 스크림 위 브랜드/채널명),
  * 없으면 플랫폼 색 배경 위에 브랜드 + 본문 앞 40자를 아주 작게 찍는 텍스트 타일.
- * 상태(idle/analyzing/done/error)에 따라 빨간 테두리 · 체크 뱃지 · 에러 뱃지를 표시하고,
- * AI 생성 예시(post.generated)는 좌상단에 흰 "예시" 뱃지를 붙입니다.
+ * 상태(idle/analyzing/done/error/skipped)에 따라 빨간 테두리 · 체크 뱃지 · 에러 뱃지 · 반투명(제외)을 표시하고,
+ * AI 생성 예시(post.generated)는 좌상단에 흰 "예시" 뱃지, 확신도 구간이 review/uncertain 이면 우하단에 "검토"/"불확실" 뱃지를 붙입니다.
  */
 "use client";
 
-import type { Platform, Post } from "@/lib/types";
+import type { ConfidenceBand, Platform, Post } from "@/lib/types";
 import { truncate } from "@/lib/format";
 
-export type TileStatus = "idle" | "analyzing" | "done" | "error";
+export type TileStatus = "idle" | "analyzing" | "done" | "error" | "skipped";
 
 const PLATFORM_BG: Record<Platform, string> = {
   x: "#000000",
@@ -25,37 +25,47 @@ export const PLATFORM_NAME: Record<Platform, string> = {
   instagram: "Instagram",
 };
 
+const BAND_BADGE: Record<ConfidenceBand, { text: string; cls: string } | null> = {
+  auto: null,
+  review: { text: "검토", cls: "bg-white text-ink" },
+  uncertain: { text: "불확실", cls: "bg-accent text-white" },
+};
+
 interface Props {
   post: Post;
   status?: TileStatus;
   /** 타일 크기 — 모자이크(sm) / 패널·카드(md, lg) */
   size?: "sm" | "md" | "lg";
+  /** 판정 확신도 구간 (완료된 타일에만) */
+  band?: ConfidenceBand;
   onClick?: () => void;
   title?: string;
 }
 
-export default function PostTile({ post, status = "idle", size = "sm", onClick, title }: Props) {
+export default function PostTile({ post, status = "idle", size = "sm", band, onClick, title }: Props) {
   const isImg = Boolean(post.thumbnailUrl);
   const generated = Boolean(post.generated);
   const textLimit = size === "sm" ? 40 : size === "md" ? 90 : 220;
   const cls = [
     "relative block w-full overflow-hidden rounded-[3px] text-left text-white transition-opacity duration-200",
     "aspect-[16/10]",
-    status === "done" ? "opacity-[0.72]" : "opacity-100",
+    status === "done" ? "opacity-[0.72]" : status === "skipped" ? "opacity-[0.28] grayscale" : "opacity-100",
     status === "analyzing" ? "ring-analyzing z-10" : "",
     onClick ? "cursor-pointer hover:opacity-100" : "",
   ].join(" ");
+  const badge = status === "done" && band ? BAND_BADGE[band] : null;
 
   const inner = (
     <>
       {isImg ? (
-        // 외부 임의 URL 썸네일이라 next/image 최적화 대상이 아님
+        // 외부 임의 URL 썸네일이라 next/image 최적화 대상이 아님. 인스타/스레드 CDN 은 referer 를 보내지 않아야 뜸
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={post.thumbnailUrl}
           alt={`${post.brand} 포스트 썸네일`}
           className="absolute inset-0 h-full w-full object-cover"
           loading="lazy"
+          referrerPolicy="no-referrer"
         />
       ) : (
         <div
@@ -137,6 +147,29 @@ export default function PostTile({ post, status = "idle", size = "sm", onClick, 
           aria-label="분석 실패"
         >
           !
+        </span>
+      )}
+      {status === "skipped" && (
+        <span
+          className={[
+            "absolute right-[3px] top-[3px] rounded-[2px] bg-ink font-mono leading-none text-white",
+            size === "sm" ? "px-[3px] py-[2px] text-[7px]" : "px-1 py-[2px] text-[8px]",
+          ].join(" ")}
+          aria-label="관문에서 제외됨"
+        >
+          제외
+        </span>
+      )}
+      {badge && (
+        <span
+          className={[
+            "absolute bottom-[3px] right-[3px] rounded-[2px] font-mono leading-none shadow-sm",
+            badge.cls,
+            size === "sm" ? "px-[3px] py-[2px] text-[7px]" : "px-1 py-[2px] text-[8px]",
+          ].join(" ")}
+          aria-label={band === "review" ? "검토 권장" : "불확실"}
+        >
+          {badge.text}
         </span>
       )}
     </>

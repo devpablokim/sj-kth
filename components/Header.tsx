@@ -12,7 +12,7 @@ interface Props {
   mode: "live" | "demo" | null;
   jevModel: string | null;
   draftModel: string | null;
-  /** 포스트 출처 — 샘플 / AI 생성 예시 / 붙여넣기 / YouTube 검색 */
+  /** 포스트 출처 — 샘플 / AI 생성 예시 / 붙여넣기 / YouTube 검색 / 무료 수집 */
   source?: PostSource;
 }
 
@@ -21,6 +21,7 @@ const SOURCE_META: Record<PostSource, string> = {
   generated: "AI-generated examples · 실제 게시물 아님",
   pasted: "pasted posts",
   youtube: "youtube search",
+  collected: "real posts · 무료 수집",
 };
 
 export default function Header({ posts, mode, jevModel, draftModel, source = "sample" }: Props) {

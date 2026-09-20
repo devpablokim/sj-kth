@@ -10,7 +10,8 @@
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
     "env:init": "node scripts/env-init.mjs",
-    "jev:smoke": "tsx scripts/jev-smoke.ts"
+    "jev:smoke": "tsx scripts/jev-smoke.ts",
+    "test": "tsx --test tests/*.test.ts"
   },
   "engines": {
     "node": ">=20.12"

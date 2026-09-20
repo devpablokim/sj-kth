@@ -1,6 +1,6 @@
 /*
  * Drafts — "DRAFTS GENERATED  {n}" 패널. 가로 스크롤 카드 행:
- * 원본 타일(sm) · "{원본 브랜드} → 우리 브랜드" · headline · matchScore%(빨강) · OPEN THIS DRAFT.
+ * 원본 타일(sm) · "{원본 브랜드} → 우리 브랜드" · headline · matchScore%(빨강) · 심사 결과 칩(승인/검토/차단) · OPEN THIS DRAFT.
  * 시안 생성 중이면 맨 뒤에 "generating…" 자리표시 카드.
  */
 "use client";
@@ -54,8 +54,19 @@ export default function Drafts({ drafts, drafting, posts, onOpen, draftCount }: 
                   <div className="mt-1 line-clamp-2 text-[12px] leading-snug text-ink" title={d.headline}>
                     {d.headline}
                   </div>
-                  <div className="tabular mt-1 font-mono text-[14px] font-bold leading-none text-accent">
-                    {fmtScorePct(d.matchScore)}
+                  <div className="mt-1 flex items-center gap-1.5">
+                    <span className="tabular font-mono text-[14px] font-bold leading-none text-accent">{fmtScorePct(d.matchScore)}</span>
+                    {d.review && (
+                      <span
+                        className={[
+                          "label inline-flex h-[14px] items-center rounded-[2px] border px-1 !text-[8px]",
+                          d.review.decision === "approve" ? "border-ok text-ok" : d.review.decision === "block" ? "border-accent bg-accent text-white" : "border-line text-muted",
+                        ].join(" ")}
+                        title={d.review.reasons.join(" · ")}
+                      >
+                        {d.review.decision === "approve" ? "승인" : d.review.decision === "block" ? "차단" : "검토"}
+                      </span>
+                    )}
                   </div>
                   <button
                     type="button"

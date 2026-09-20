@@ -1,34 +1,47 @@
 /*
  * RunControls — "설정" 카드.
- *  A) 우리 브랜드: 브랜드명 · 카테고리 · 핵심 메시지 · 시안 개수 — 시안 생성에만 쓰이고 검색어로는 쓰이지 않음.
- *  B) 분석 대상: 샘플 48건 / 카테고리 예시 생성(POST /api/generate-set) / 직접 붙여넣기(텍스트 → Post[], 고급 JSON) /
- *     YouTube 검색(GET /api/collect/youtube). 결과는 onPostsLoaded(posts, source) 로 올리고, null 이면 샘플로 되돌립니다.
+ *  A) 우리 브랜드: 브랜드명 · 카테고리 · 핵심 메시지 · 시안 개수 — 관문 판정(관련성)과 시안 생성에 쓰이고, 카테고리는 검색어 기본값.
+ *  B) 분석 대상: 실제 수집(무료, 기본 · CollectPanel → POST /api/collect) / 샘플 48건 / 카테고리 예시 생성(POST /api/generate-set) /
+ *     직접 붙여넣기(텍스트 → Post[], 고급 JSON). 결과는 onPostsLoaded(posts, source) 로 올리고, null 이면 샘플로 되돌립니다.
+ *  C) 판정 옵션(접이식): 점수 프리셋 · 확신도 기준 · 관문/재검사/구조 토글 → RunRequest.options
  *  맨 아래: "현재 분석 대상: {label} · {n}건" · RUN ANALYSIS → / STOP (소스 로딩 중엔 비활성).
  */
 "use client";
 
 import { useEffect, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import type {
-  CollectResponse,
   GenerateSetRequest,
   GenerateSetResponse,
+  JudgeOptions,
   Platform,
   Post,
   PostFormat,
   PostSource,
   RunRequest,
+  ScoringPreset,
 } from "@/lib/types";
 import type { RunStatus } from "@/lib/client/useRun";
 import { useElapsedSeconds } from "@/lib/client/useElapsedSeconds";
 import { fmtInt, fmtUsd } from "@/lib/format";
+import { PRESET_LABEL_KO } from "@/lib/scoring";
 import { PLATFORM_NAME } from "./PostTile";
+import CollectPanel from "./CollectPanel";
 
 export interface BrandForm {
   name: string;
   category: string;
   positioning: string;
   draftCount: number;
+  options: JudgeOptions;
 }
+
+/** 확신도 기준 프리셋 (auto / review 경계) */
+const STRICTNESS: ReadonlyArray<{ id: string; label: string; auto: number; review: number }> = [
+  { id: "strict", label: "엄격 — auto ≥ 0.7 · review ≥ 0.5", auto: 0.7, review: 0.5 },
+  { id: "normal", label: "보통 — auto ≥ 0.6 · review ≥ 0.4", auto: 0.6, review: 0.4 },
+  { id: "loose", label: "느슨 — auto ≥ 0.5 · review ≥ 0.3", auto: 0.5, review: 0.3 },
+];
+const PRESETS: ScoringPreset[] = ["imitate", "convert", "engagement"];
 
 interface Props {
   status: RunStatus;
@@ -43,17 +56,17 @@ interface Props {
   postsCount: number;
   /** live 가 아니면 예시 생성이 막힘을 설명 */
   mode: "live" | "demo" | null;
-  /** 현재 분석 대상 라벨 (예: "샘플 48건", "YouTube 검색") */
+  /** 현재 분석 대상 라벨 (예: "샘플 48건", "실제 수집") */
   sourceLabel: string;
 }
 
-type BenchMode = "sample" | "generate" | "paste" | "youtube";
+type BenchMode = "collect" | "sample" | "generate" | "paste";
 
 const BENCH_MODES: ReadonlyArray<{ id: BenchMode; label: string }> = [
+  { id: "collect", label: "실제 수집 (무료)" },
   { id: "sample", label: "샘플 48건" },
   { id: "generate", label: "카테고리 예시 생성" },
   { id: "paste", label: "직접 붙여넣기" },
-  { id: "youtube", label: "YouTube 검색" },
 ];
 
 const COUNTS = [12, 24, 48] as const;
@@ -163,8 +176,6 @@ function errorOf(json: unknown, status: number): string {
   return `서버 응답 오류 (${status})`;
 }
 
-const YT_KEY_HINT = "Vercel 환경변수 YOUTUBE_API_KEY 필요 — Google Cloud Console → YouTube Data API v3 키";
-
 const inputCls =
   "h-8 w-full min-w-0 rounded-[4px] border border-line bg-panel px-2.5 text-[12px] text-ink placeholder:text-faint focus:border-ink disabled:opacity-50";
 const selectCls =
@@ -214,7 +225,9 @@ export default function RunControls({
   sourceLabel,
 }: Props) {
   const running = status === "running";
-  const [benchMode, setBenchMode] = useState<BenchMode>("sample");
+  const [benchMode, setBenchMode] = useState<BenchMode>("collect");
+  const [collectLoading, setCollectLoading] = useState(false);
+  const [optionsOpen, setOptionsOpen] = useState(false);
 
   // B-2 카테고리 예시 생성
   const [competitors, setCompetitors] = useState("");
@@ -236,41 +249,40 @@ export default function RunControls({
   const [jsonRaw, setJsonRaw] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  // B-4 YouTube 검색 (검색어를 손대기 전까지는 카테고리를 그대로 씀)
-  const [ytQuery, setYtQuery] = useState<string | null>(null);
-  const [ytCount, setYtCount] = useState<Count>(24);
-  const [ytStartedAt, setYtStartedAt] = useState<number | null>(null);
-  const [ytError, setYtError] = useState<{ message: string; keyHint: boolean } | null>(null);
-  const [ytResult, setYtResult] = useState<number | null>(null);
-  const ytAbort = useRef<AbortController | null>(null);
-  const ytElapsed = useElapsedSeconds(ytStartedAt);
-  const ytValue = ytQuery ?? form.category;
-
   // 언마운트 시 진행 중 요청 정리
   useEffect(() => {
     return () => {
       genAbort.current?.abort();
-      ytAbort.current?.abort();
     };
   }, []);
 
-  const sourceLoading = genStartedAt !== null || ytStartedAt !== null;
+  const sourceLoading = genStartedAt !== null || collectLoading;
   const nameMissing = form.name.trim().length === 0;
-  const canRun = !running && !sourceLoading && !nameMissing;
+  const noPosts = postsCount === 0;
+  const canRun = !running && !sourceLoading && !nameMissing && !noPosts;
   const busy = running || sourceLoading;
+
+  const buildRequest = (posts: Post[] | null): RunRequest => ({
+    brand: {
+      name: form.name.trim(),
+      category: form.category.trim(),
+      positioning: form.positioning.trim(),
+    },
+    draftCount: Math.max(0, Math.min(10, Math.round(form.draftCount) || 0)),
+    options: form.options,
+    ...(posts && posts.length ? { posts } : {}),
+  });
 
   const submit = () => {
     if (!canRun) return;
-    const request: RunRequest = {
-      brand: {
-        name: form.name.trim(),
-        category: form.category.trim(),
-        positioning: form.positioning.trim(),
-      },
-      draftCount: Math.max(0, Math.min(10, Math.round(form.draftCount) || 0)),
-      ...(customPosts && customPosts.length ? { posts: customPosts } : {}),
-    };
-    onRun(request);
+    onRun(buildRequest(customPosts));
+  };
+
+  /** 수집 직후 그 포스트로 바로 실행 (customPosts 상태 갱신을 기다리지 않음) */
+  const runWith = (posts: Post[]) => {
+    onPostsLoaded(posts, "collected");
+    if (running || nameMissing) return;
+    onRun(buildRequest(posts));
   };
 
   const resetToSample = () => {
@@ -278,13 +290,15 @@ export default function RunControls({
     setBenchMode("sample");
     setGenResult(null);
     setPasteResult(null);
-    setYtResult(null);
   };
 
   const selectMode = (id: BenchMode) => {
     setBenchMode(id);
-    if (id === "sample" && customPosts) resetToSample();
+    if (id === "sample") resetToSample();
   };
+
+  const setOptions = (patch: Partial<JudgeOptions>) => onFormChange({ ...form, options: { ...form.options, ...patch } });
+  const strictnessId = STRICTNESS.find((s) => s.auto === form.options.thresholds.auto && s.review === form.options.thresholds.review)?.id ?? "custom";
 
   const generate = async () => {
     const brand = { name: form.name.trim(), category: form.category.trim(), positioning: form.positioning.trim() };
@@ -361,46 +375,7 @@ export default function RunControls({
     setJsonOpen(false);
   };
 
-  const search = async () => {
-    const q = ytValue.trim();
-    if (!q) {
-      setYtError({ message: "검색어를 입력하세요 (기본값은 위 카테고리).", keyHint: false });
-      return;
-    }
-    ytAbort.current?.abort();
-    const ctrl = new AbortController();
-    ytAbort.current = ctrl;
-    setYtError(null);
-    setYtResult(null);
-    setYtStartedAt(Date.now());
-    try {
-      const res = await fetch(`/api/collect/youtube?q=${encodeURIComponent(q)}&max=${ytCount}`, { signal: ctrl.signal });
-      const json: unknown = await res.json().catch(() => null);
-      if (!res.ok) {
-        setYtError({ message: errorOf(json, res.status), keyHint: res.status === 400 });
-        return;
-      }
-      const data = json as Partial<CollectResponse> | null;
-      const posts = data && Array.isArray(data.posts) ? data.posts : [];
-      if (posts.length === 0) {
-        setYtError({ message: "검색 결과가 없습니다. 다른 검색어로 시도해 보세요.", keyHint: false });
-        return;
-      }
-      onPostsLoaded(posts, "youtube");
-      setYtResult(posts.length);
-    } catch (err) {
-      if (ctrl.signal.aborted) return;
-      setYtError({ message: `요청 실패: ${err instanceof Error ? err.message : String(err)}`, keyHint: false });
-    } finally {
-      if (ytAbort.current === ctrl) {
-        ytAbort.current = null;
-        setYtStartedAt(null);
-      }
-    }
-  };
-
   const generating = genStartedAt !== null;
-  const searching = ytStartedAt !== null;
   const canGenerate = !busy && mode !== "demo";
 
   return (
@@ -464,7 +439,7 @@ export default function RunControls({
           </Field>
         </div>
         <p className="mt-1.5 text-[11px] leading-snug text-muted">
-          이 값은 &lsquo;우리 브랜드 시안&rsquo;을 쓸 때만 사용됩니다. 무엇을 분석할지는 아래 &lsquo;분석 대상&rsquo;에서 고릅니다.
+          카테고리는 관문 판정(&lsquo;우리 카테고리와 관련된 글인가&rsquo;)과 수집 검색어 기본값에, 브랜드명·핵심 메시지는 시안 생성과 시안 심사(포지셔닝 모순)에 쓰입니다.
         </p>
       </section>
 
@@ -472,7 +447,7 @@ export default function RunControls({
       <section aria-label="분석 대상" className="border-t border-line pt-3">
         <div className="mb-1.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
           <span className="label">benchmark source</span>
-          <span className="text-[11px] text-muted">· 무엇을 분석할지</span>
+          <span className="text-[11px] text-muted">· 무엇을 분석할지 (기본: 실제 게시물 무료 수집)</span>
         </div>
         <div className="flex flex-wrap gap-1" role="tablist" aria-label="분석 대상 선택">
           {BENCH_MODES.map((m) => {
@@ -497,6 +472,16 @@ export default function RunControls({
         </div>
 
         <div className="mt-2 rounded-[4px] border border-line bg-page p-2.5" role="tabpanel">
+          {benchMode === "collect" && (
+            <CollectPanel
+              category={form.category}
+              busy={running || generating}
+              onCollected={(posts) => onPostsLoaded(posts, "collected")}
+              onCollectAndRun={runWith}
+              onLoadingChange={setCollectLoading}
+            />
+          )}
+
           {benchMode === "sample" && (
             <p className="text-[11px] leading-snug text-muted">AI 전환 컨설팅 · 기업 AI 교육 카테고리의 가상 벤치마크 브랜드 6곳 48건 — 카드뉴스 · 마케팅 문구 · 광고 소재 (데모용, 실제 기업 아님)</p>
           )}
@@ -678,72 +663,80 @@ export default function RunControls({
               )}
             </div>
           )}
-
-          {benchMode === "youtube" && (
-            <div className="flex flex-col gap-2">
-              <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_88px_auto] sm:items-end">
-                <Field label="검색어 (기본값: 카테고리)">
-                  <input
-                    className={inputCls}
-                    value={ytValue}
-                    onChange={(e) => setYtQuery(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (isEnter(e) && !busy) void search();
-                    }}
-                    placeholder="예: AI 컨설팅 교육"
-                    disabled={busy}
-                  />
-                </Field>
-                <Field label="건수">
-                  <select
-                    className={selectCls}
-                    value={ytCount}
-                    onChange={(e) => setYtCount(toCount(e.target.value))}
-                    disabled={busy}
-                    aria-label="수집할 영상 수"
-                  >
-                    {COUNTS.map((c) => (
-                      <option key={c} value={c}>
-                        {c}개
-                      </option>
-                    ))}
-                  </select>
-                </Field>
-                <button
-                  type="button"
-                  onClick={() => void search()}
-                  disabled={busy}
-                  className={primaryBtn}
-                  aria-label="YouTube 검색"
-                  aria-busy={searching}
-                >
-                  {searching ? (
-                    <>
-                      <Spinner />
-                      검색 중… {ytElapsed}s
-                    </>
-                  ) : (
-                    "검색"
-                  )}
-                </button>
-              </div>
-              <p className="text-[11px] leading-snug text-muted">
-                YouTube Data API 로 실제 영상(제목·설명·조회수·썸네일)을 가져와 판정합니다. 서버에 YOUTUBE_API_KEY 가 있어야 합니다.
-              </p>
-              {ytError && (
-                <div className="text-[11px] leading-snug text-accent" role="alert">
-                  <p>{ytError.message}</p>
-                  {ytError.keyHint && <p className="mt-0.5 text-muted">{YT_KEY_HINT}</p>}
-                </div>
-              )}
-              {ytResult !== null && !ytError && (
-                <p className="text-[11px] leading-snug text-ok" aria-live="polite">
-                  {fmtInt(ytResult)}개 영상 수집됨
-                </p>
-              )}
-            </div>
-          )}
         </div>
+      </section>
+
+      {/* C. 판정 옵션 */}
+      <section aria-label="판정 옵션" className="border-t border-line pt-2.5">
+        <button
+          type="button"
+          onClick={() => setOptionsOpen((v) => !v)}
+          className="flex w-full items-baseline gap-2 text-left"
+          aria-expanded={optionsOpen}
+          aria-controls="judge-options"
+        >
+          <span className="label">judge options</span>
+          <span className="min-w-0 flex-1 truncate text-[11px] text-muted">
+            · {PRESET_LABEL_KO[form.options.preset].split(" — ")[0]} · {STRICTNESS.find((x) => x.id === strictnessId)?.label.split(" — ")[0] ?? "사용자 지정"} ·{" "}
+            {[form.options.gate ? "관문" : null, form.options.recheck ? "재검사" : null, form.options.structure ? "구조" : null].filter(Boolean).join("·") || "추가 판정 없음"}
+          </span>
+          <span className="label !text-[10px] !text-ink">{optionsOpen ? "접기" : "펼치기"}</span>
+        </button>
+        {optionsOpen && (
+          <div id="judge-options" className="mt-2 grid grid-cols-1 gap-2 rounded-[4px] border border-line bg-page p-2.5 sm:grid-cols-2">
+            <Field label="벤치마크 점수 가중치">
+              <select
+                className={selectCls}
+                value={form.options.preset}
+                onChange={(e) => setOptions({ preset: PRESETS.includes(e.target.value as ScoringPreset) ? (e.target.value as ScoringPreset) : "imitate" })}
+                disabled={running}
+                aria-label="점수 프리셋"
+              >
+                {PRESETS.map((p) => (
+                  <option key={p} value={p}>
+                    {PRESET_LABEL_KO[p]}
+                  </option>
+                ))}
+              </select>
+            </Field>
+            <Field label="확신도 기준 (auto / review 경계)">
+              <select
+                className={selectCls}
+                value={strictnessId}
+                onChange={(e) => {
+                  const st = STRICTNESS.find((x) => x.id === e.target.value);
+                  if (st) setOptions({ thresholds: { auto: st.auto, review: st.review } });
+                }}
+                disabled={running}
+                aria-label="확신도 기준"
+              >
+                {STRICTNESS.map((st) => (
+                  <option key={st.id} value={st.id}>
+                    {st.label}
+                  </option>
+                ))}
+                {strictnessId === "custom" && <option value="custom">사용자 지정</option>}
+              </select>
+            </Field>
+            <div className="flex flex-wrap gap-x-4 gap-y-1 sm:col-span-2" role="group" aria-label="추가 판정 단계">
+              <label className="flex items-center gap-1.5 text-[11px] text-ink" title="수집된 실제 게시물이 우리 카테고리의 마케팅 콘텐츠인지 먼저 거릅니다 (무관하면 제외)">
+                <input type="checkbox" checked={form.options.gate} onChange={(e) => setOptions({ gate: e.target.checked })} disabled={running} className="h-3 w-3 accent-black" />
+                관문 (관련성 필터)
+              </label>
+              <label className="flex items-center gap-1.5 text-[11px] text-ink" title="확신도가 낮은 판정은 핵심 질문을 한 번 더 물어 답이 흔들리는지 봅니다">
+                <input type="checkbox" checked={form.options.recheck} onChange={(e) => setOptions({ recheck: e.target.checked })} disabled={running} className="h-3 w-3 accent-black" />
+                재검사 (자기일관성)
+              </label>
+              <label className="flex items-center gap-1.5 text-[11px] text-ink" title="형식이 정해진 뒤 형식별 세부 구조(리스트형·스토리형·비포애프터…)를 묻습니다">
+                <input type="checkbox" checked={form.options.structure} onChange={(e) => setOptions({ structure: e.target.checked })} disabled={running} className="h-3 w-3 accent-black" />
+                구조 (2단계 분류)
+              </label>
+            </div>
+            <p className="text-[11px] leading-snug text-muted sm:col-span-2">
+              jev 는 원자적 질문에만 답하고, 가중치·임계값·제외 규칙은 코드가 정합니다. 관문 2 + 본 판정 10 + 구조 1 + 재검사 3 = 포스트당 최대 16개 질문, 호출당 200~500ms · 수십 원 수준.
+            </p>
+          </div>
+        )}
       </section>
 
       {/* 실행 행 */}
@@ -763,7 +756,11 @@ export default function RunControls({
           ) : null}
         </div>
         <div className="flex items-center gap-2">
-          {!running && nameMissing && <span className="text-[11px] text-muted">브랜드명을 입력하면 실행할 수 있어요</span>}
+          {!running && nameMissing ? (
+            <span className="text-[11px] text-muted">브랜드명을 입력하면 실행할 수 있어요</span>
+          ) : !running && noPosts ? (
+            <span className="text-[11px] text-muted">먼저 &lsquo;수집 후 분석 실행&rsquo;을 누르거나 샘플을 고르세요</span>
+          ) : null}
           {running ? (
             <button
               type="button"

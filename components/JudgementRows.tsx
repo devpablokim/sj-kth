@@ -2,13 +2,14 @@
  * JudgementRows — 질문별 판정 행 [라벨 · 값 · 막대 · %] (QUESTION_ORDER 순).
  * AnalyzingPanel(우측 패널)과 PostDrawer(상세 보기)가 함께 씁니다. 검정 실선 = 기본, 빨강 점선 = "따라 해야 할 강점".
  * pending 이면 값 "…" 과 빈 막대를 그립니다. tagsOf() 는 판정에서 true 인 태그 칩 목록.
+ * PatternRows — jev 활용 패턴 결과 행: 관문(relevant · kind) · 구조(2단계) · 재검사 · 확신도 구간.
  */
 "use client";
 
 import type { Judgement, PostAnalysis, QuestionId } from "@/lib/types";
-import { QUESTION_LABELS, QUESTION_ORDER } from "@/lib/questions";
+import { QUESTION_LABELS, QUESTION_ORDER, STRUCTURE_LABEL_KO } from "@/lib/questions";
 import { choiceLabel, fmtPct } from "@/lib/format";
-import { FORMAT_LABEL_KO, HOOK_LABEL_KO, TONE_LABEL_KO } from "@/lib/scoring";
+import { BAND_LABEL_KO, FORMAT_LABEL_KO, HOOK_LABEL_KO, KIND_LABEL_KO, TONE_LABEL_KO } from "@/lib/scoring";
 
 const CHOICE_KO: Partial<Record<QuestionId, Record<string, string>>> = {
   format: FORMAT_LABEL_KO,
@@ -121,6 +122,73 @@ export default function JudgementRows({ analysis, pending = false, className = "
           </div>
         );
       })}
+    </div>
+  );
+}
+
+/** jev 활용 패턴 결과 행 — 관문 · 구조 · 재검사 · 확신도 구간 (있는 것만) */
+export function PatternRows({ analysis, className = "" }: { analysis: PostAnalysis; className?: string }) {
+  const rows: Array<{ id: string; label: string; value: string; pct: number; accent: boolean; title?: string }> = [];
+  if (analysis.gate) {
+    const g = analysis.gate;
+    rows.push({
+      id: "gate",
+      label: "gate",
+      value: `${g.decision} · ${KIND_LABEL_KO[g.kind] ?? g.kind}`,
+      pct: g.relevant,
+      accent: g.decision !== "pass",
+      title: `관문: ${g.reason} · 관련성 ${fmtPct(g.relevant)}`,
+    });
+  }
+  if (analysis.structure) {
+    const st = analysis.structure;
+    const p = st.probabilities?.[st.choice];
+    rows.push({
+      id: "structure",
+      label: "structure",
+      value: `${choiceLabel(st.choice)} · ${STRUCTURE_LABEL_KO[st.choice] ?? st.choice}`,
+      pct: typeof p === "number" ? p : st.confidence,
+      accent: false,
+      title: `2단계 구조 (${st.format}) · 확신도 ${fmtPct(st.confidence)}`,
+    });
+  }
+  if (analysis.recheck) {
+    const rc = analysis.recheck;
+    rows.push({
+      id: "recheck",
+      label: "recheck",
+      value: rc.agreed ? "일치" : `불일치 · ${rc.disagreements.map(choiceLabel).join(", ")}`,
+      pct: rc.agreed ? 1 : 0.25,
+      accent: !rc.agreed,
+      title: "같은 입력에 핵심 질문을 한 번 더 물은 결과",
+    });
+  }
+  rows.push({
+    id: "band",
+    label: "confidence",
+    value: `${BAND_LABEL_KO[analysis.band]} · ${fmtPct(analysis.confidence)}`,
+    pct: analysis.confidence,
+    accent: analysis.band === "uncertain",
+    title: analysis.providerConfidence ? "모델이 준 질문별 confidence 평균" : "답변 분포에서 계산한 확신도 평균",
+  });
+  return (
+    <div className={className} role="table" aria-label="판정 패턴">
+      {rows.map((r) => (
+        <div key={r.id} role="row" className="flex h-[22px] items-center gap-2 border-b border-line last:border-b-0" title={r.title}>
+          <span role="rowheader" className="label w-[84px] shrink-0 truncate">
+            {r.label}
+          </span>
+          <span role="cell" className={`w-[96px] shrink-0 truncate text-[11px] leading-none sm:w-[120px] ${r.accent ? "text-accent" : "text-ink"}`} title={r.value}>
+            {r.value}
+          </span>
+          <span role="cell" className="bar-track min-w-0 flex-1">
+            <span className={r.accent ? "bar-dashed" : "bar"} style={{ width: `${Math.max(0, Math.min(1, r.pct)) * 100}%` }} />
+          </span>
+          <span role="cell" className="tabular w-[34px] shrink-0 text-right font-mono text-[10px] text-muted">
+            {fmtPct(r.pct)}
+          </span>
+        </div>
+      ))}
     </div>
   );
 }

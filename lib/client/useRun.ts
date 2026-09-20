@@ -1,14 +1,14 @@
 /*
  * useRun — /api/analyze 의 SSE 스트림을 읽어 RunEvent 를 리듀서로 접는 클라이언트 훅.
  * `data: {json}` 라인이 빈 줄로 구분되어 오며, 청크가 중간에 잘릴 수 있어 버퍼링 후 파싱합니다.
- * 상태: mode, posts, analyses(Map), current, stats, drafts, errors, status(idle|running|done|error),
- * calls(jev/생성 모델 호출 원문 로그 — 최대 500개, clearCalls() 로 비움).
+ * 상태: mode, posts, analyses(Map), skipped(관문에서 제외된 포스트 → GateResult), options(서버가 확정한 판정 옵션),
+ * current, stats, drafts, errors, status(idle|running|done|error), calls(jev/생성 모델 호출 원문 로그 — 최대 500개, clearCalls() 로 비움).
  * addDraft / addCalls — 실행 밖에서(PostDrawer 의 "이 포스트로 시안 만들기") 만든 시안과 호출 로그를 같은 상태에 합칩니다.
  */
 "use client";
 
 import { useCallback, useEffect, useReducer, useRef } from "react";
-import type { CallLogEntry, Draft, Post, PostAnalysis, RunEvent, RunRequest, RunStats } from "@/lib/types";
+import type { CallLogEntry, Draft, GateResult, JudgeOptions, Post, PostAnalysis, RunEvent, RunRequest, RunStats } from "@/lib/types";
 
 export type RunStatus = "idle" | "running" | "done" | "error";
 
@@ -25,6 +25,10 @@ export interface RunState {
   draftModel: string | null;
   posts: Post[];
   analyses: Map<string, PostAnalysis>;
+  /** 관문(gate)에서 제외된 포스트 — 본 판정 없이 사유만 */
+  skipped: Map<string, GateResult>;
+  /** 서버가 이번 실행에 적용한 판정 옵션 (run_start) */
+  options: JudgeOptions | null;
   /** post_start 를 받았지만 아직 결과가 없는 포스트들 (동시성 > 1) */
   inFlight: string[];
   /** 가장 최근에 시작된 포스트 — 모자이크의 빨간 테두리 */
@@ -56,6 +60,8 @@ export const EMPTY_STATS: RunStats = {
   costUsd: 0,
   costKrw: 0,
   draftsGenerated: 0,
+  postsExcluded: 0,
+  postsReview: 0,
 };
 
 type Action =
@@ -77,6 +83,8 @@ function initialState(posts: Post[]): RunState {
     draftModel: null,
     posts,
     analyses: new Map(),
+    skipped: new Map(),
+    options: null,
     inFlight: [],
     current: null,
     lastAnalyzedId: null,
@@ -169,6 +177,7 @@ function applyEvent(state: RunState, e: RunEvent): RunState {
         mode: e.mode,
         jevModel: e.jevModel,
         draftModel: e.draftModel,
+        options: e.options ?? state.options,
         posts: e.posts.length ? e.posts : state.posts,
         stats: { ...state.stats, postsTotal: e.posts.length || state.posts.length },
         startedAt: state.startedAt ?? e.at,
@@ -192,6 +201,18 @@ function applyEvent(state: RunState, e: RunEvent): RunState {
         inFlight,
         current: state.current === e.analysis.postId ? (inFlight[inFlight.length - 1] ?? null) : state.current,
         lastAnalyzedId: e.analysis.postId,
+        stats: mergeStats(state.stats, e.stats),
+      };
+    }
+    case "post_skipped": {
+      const skipped = new Map(state.skipped);
+      skipped.set(e.postId, e.gate);
+      const inFlight = state.inFlight.filter((id) => id !== e.postId);
+      return {
+        ...state,
+        skipped,
+        inFlight,
+        current: state.current === e.postId ? (inFlight[inFlight.length - 1] ?? null) : state.current,
         stats: mergeStats(state.stats, e.stats),
       };
     }
@@ -263,6 +284,8 @@ function mergeStats(prev: RunStats, next: RunStats | undefined): RunStats {
     costUsd: next.costUsd ?? prev.costUsd,
     costKrw: next.costKrw ?? prev.costKrw,
     draftsGenerated: next.draftsGenerated ?? prev.draftsGenerated,
+    postsExcluded: next.postsExcluded ?? prev.postsExcluded,
+    postsReview: next.postsReview ?? prev.postsReview,
   };
 }
 

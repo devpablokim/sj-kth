@@ -2,13 +2,15 @@
  * AnalyzingPanel — 우측 상단 "ANALYZING POST  {latency} MS" 패널.
  * 좌: 포스트 타일 · 브랜드 · @handle · 태그(판정에서 true 인 것) · 한 줄 요약 · benchmark/confidence.
  * 우: JudgementRows — QUESTION_ORDER 순서로 [라벨 · 값 · 막대 · %]. 검정 실선 = 기본, 빨강 점선 = "따라 해야 할 강점".
+ *     그 아래 PatternRows — 관문 · 2단계 구조 · 재검사 · 확신도 구간.
  */
 "use client";
 
 import type { Post, PostAnalysis } from "@/lib/types";
 import { fmtInt, fmtPct } from "@/lib/format";
 import PostTile, { PLATFORM_NAME } from "./PostTile";
-import JudgementRows, { tagsOf } from "./JudgementRows";
+import JudgementRows, { PatternRows, tagsOf } from "./JudgementRows";
+import { BAND_LABEL_KO } from "@/lib/scoring";
 
 interface Props {
   post: Post | null;
@@ -60,6 +62,7 @@ export default function AnalyzingPanel({ post, analysis, analyzing }: Props) {
                 <div className="label mt-2 tabular">
                   benchmark {fmtInt(analysis.benchmarkScore)} · confidence {fmtPct(analysis.confidence)}
                 </div>
+                <div className={`label mt-1 ${analysis.band === "uncertain" ? "!text-accent" : ""}`}>{BAND_LABEL_KO[analysis.band]}</div>
               </>
             ) : pending ? (
               <div className="label mt-2 animate-pulse text-accent" aria-live="polite">
@@ -70,8 +73,11 @@ export default function AnalyzingPanel({ post, analysis, analyzing }: Props) {
             )}
           </div>
 
-          {/* 우: 질문별 행 */}
-          <JudgementRows analysis={analysis} pending={pending} className="min-w-0 flex-1" />
+          {/* 우: 질문별 행 + 패턴 행 */}
+          <div className="min-w-0 flex-1">
+            <JudgementRows analysis={analysis} pending={pending} />
+            {analysis && <PatternRows analysis={analysis} className="mt-2 border-t border-line pt-1" />}
+          </div>
         </div>
       )}
     </section>

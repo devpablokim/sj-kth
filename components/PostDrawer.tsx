@@ -1,21 +1,24 @@
 /*
  * PostDrawer — 타일/TOP BENCHMARKS 를 누르면 열리는 포스트 상세 슬라이드오버(우측 고정 560px, 폰에서는 전폭).
  * 위→아래: 헤더(브랜드 · @handle · 플랫폼 · 예시 뱃지) · 타일 · 원문 전체 · 슬라이드 · 지표 · 게시일 · "원문 열기 ↗" ·
- * jev 판정(벤치마크 점수 · 확신도 · 요약 · JudgementRows) · 시안(있으면 "시안 열기", 없으면 POST /api/draft 로 생성).
+ * jev 판정(벤치마크 점수 · 확신도 구간 · 요약 · JudgementRows · PatternRows) 또는 관문 제외 사유 · 시안(있으면 "시안 열기", 없으면 POST /api/draft 로 생성).
  * 배경 클릭 · Esc 로 닫히고, 열려 있는 동안 body 스크롤을 잠급니다. 닫히면 진행 중인 시안 요청은 abort.
  */
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import type { CallLogEntry, Draft, DraftRequest, DraftResponse, Post, PostAnalysis } from "@/lib/types";
+import type { CallLogEntry, Draft, DraftRequest, DraftResponse, GateResult, Post, PostAnalysis } from "@/lib/types";
 import { fmtInt, fmtPct } from "@/lib/format";
+import { BAND_LABEL_KO, KIND_LABEL_KO } from "@/lib/scoring";
 import { useElapsedSeconds } from "@/lib/client/useElapsedSeconds";
 import PostTile, { PLATFORM_NAME } from "./PostTile";
-import JudgementRows, { tagsOf } from "./JudgementRows";
+import JudgementRows, { PatternRows, tagsOf } from "./JudgementRows";
 
 interface Props {
   post: Post;
   analysis: PostAnalysis | null;
+  /** 관문에서 제외된 포스트면 그 사유 */
+  skipped?: GateResult | null;
   brand: { name: string; category: string; positioning: string };
   onClose: () => void;
   onDraftCreated: (draft: Draft, calls: CallLogEntry[]) => void;
@@ -46,7 +49,7 @@ function errorOf(json: unknown, status: number): string {
 
 const btnCls = "label inline-flex h-8 items-center justify-center gap-1.5 rounded-[4px] border px-3 !text-[10px] transition-colors";
 
-export default function PostDrawer({ post, analysis, brand, onClose, onDraftCreated, existingDraft = null, onOpenDraft }: Props) {
+export default function PostDrawer({ post, analysis, skipped = null, brand, onClose, onDraftCreated, existingDraft = null, onOpenDraft }: Props) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [created, setCreated] = useState<Draft | null>(null);
@@ -159,6 +162,14 @@ export default function PostDrawer({ post, analysis, brand, onClose, onDraftCrea
               예시
             </span>
           )}
+          {(post.source === "collected" || post.source === "youtube") && (
+            <span
+              className="label inline-flex h-[16px] shrink-0 items-center rounded-[2px] border border-ink bg-ink px-1.5 !text-[8px] !text-white"
+              title={`공개 페이지에서 수집한 실제 게시물${post.collectedVia ? ` · ${post.collectedVia}` : ""}`}
+            >
+              실제
+            </span>
+          )}
           <button
             type="button"
             onClick={onClose}
@@ -210,6 +221,11 @@ export default function PostDrawer({ post, analysis, brand, onClose, onDraftCrea
               ) : (
                 <span className="text-[11px] text-muted">원문 링크 없음 (샘플/예시 데이터)</span>
               )}
+              {post.collectedVia && (
+                <span className="label normal-case tracking-normal" title="어떤 무료 경로로 가져왔는지">
+                  via {post.collectedVia}
+                </span>
+              )}
             </div>
           </section>
 
@@ -224,6 +240,15 @@ export default function PostDrawer({ post, analysis, brand, onClose, onDraftCrea
                   </span>
                   <span className="label tabular">
                     benchmark · confidence {fmtPct(analysis.confidence)} · {fmtInt(analysis.latencyMs)} ms
+                  </span>
+                  <span
+                    className={[
+                      "label inline-flex h-[16px] items-center rounded-[2px] border px-1.5 !text-[8px]",
+                      analysis.band === "auto" ? "border-ok !text-ok" : analysis.band === "review" ? "border-line !text-ink" : "border-accent bg-accent !text-white",
+                    ].join(" ")}
+                    title="확신도 구간 — auto: 자동 채택 · review: 사람이 한 번 확인 · uncertain: 답이 흔들림"
+                  >
+                    {BAND_LABEL_KO[analysis.band]}
                   </span>
                 </div>
                 {tagsOf(analysis).length > 0 && (
@@ -240,6 +265,17 @@ export default function PostDrawer({ post, analysis, brand, onClose, onDraftCrea
                 )}
                 <p className="text-[12px] leading-snug text-muted">{analysis.summary}</p>
                 <JudgementRows analysis={analysis} className="min-w-0" />
+                <PatternRows analysis={analysis} className="min-w-0 border-t border-line pt-1" />
+              </div>
+            ) : skipped ? (
+              <div className="flex flex-col gap-1.5 rounded-[4px] border border-line bg-page p-2.5">
+                <div className="text-[12px] font-semibold text-ink">관문에서 제외됨 — 본 판정을 건너뜀</div>
+                <p className="text-[11px] leading-snug text-muted">
+                  {skipped.reason} · 관련성 {fmtPct(skipped.relevant)} · 성격 {KIND_LABEL_KO[skipped.kind] ?? skipped.kind} · 확신도 {fmtPct(skipped.confidence)}
+                </p>
+                <p className="text-[11px] leading-snug text-muted">
+                  우리 카테고리와 무관하다고 본 실제 게시물입니다. 판정 옵션에서 &lsquo;관문&rsquo;을 끄면 모든 포스트를 그대로 판정합니다.
+                </p>
               </div>
             ) : (
               <p className="text-[12px] text-muted">아직 판정 전 — RUN ANALYSIS 를 실행하세요</p>

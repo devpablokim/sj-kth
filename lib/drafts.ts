@@ -1,15 +1,19 @@
 /**
  * 시안(초안) 생성 (서버 전용).
  * live: generateObject 로 Gateway 텍스트 모델(DRAFT_MODEL)이 우리 브랜드 버전 시안을 만들고,
- *       jev 가 원본과의 구조 일치도(structure_match · same_hook · brand_fit)를 재판정해 matchScore 를 냅니다.
- * demo: lib/demoJudge.ts 의 템플릿 시안 + 시드 기반 matchScore (gateway 호출 없음).
+ *       jev 가 한 번의 호출로 (a) 원본과의 구조 일치도(structure_match · same_hook · brand_fit → matchScore) 와
+ *       (b) 적합성 심사(brand_safety · claim_risk · audience_match · contradicts_positioning · quality → approve/review/block)
+ *       를 함께 판정합니다 (speculative fan-out: 질문 8개 = 호출 1회).
+ * demo: lib/demoJudge.ts 의 템플릿 시안 + 시드 기반 matchScore + lib/demoExtra 의 휴리스틱 심사 (gateway 호출 없음).
  */
-import { generateObject, experimental_evaluate as evaluate, type JSONValue } from "ai";
+import { generateObject, type JSONValue } from "ai";
 import { z } from "zod";
-import type { Draft, Post, PostAnalysis, PostFormat } from "./types";
+import type { Draft, DraftReview, Post, PostAnalysis, PostFormat } from "./types";
 import { draftModelId, jevModelId } from "./env";
 import { demoDraft, seededRandom } from "./demoJudge";
-import { postToState, type RunMode } from "./jev";
+import { demoReview } from "./demoExtra";
+import { postToState, runEvaluate, type RunMode } from "./jev";
+import { decideDraftReview, REVIEW_QUALITY_MAX, REVIEW_QUESTIONS } from "./judge";
 import { FORMAT_LABEL_KO, HOOK_LABEL_KO, TONE_LABEL_KO } from "./scoring";
 
 export interface DraftCall {
@@ -136,6 +140,8 @@ export async function generateDraft(input: GenerateDraftInput): Promise<Generate
     const started = performance.now();
     await sleep(260 + Math.round(seededRandom(`draftdelay:${post.id}`)() * 240), signal);
     const d = demoDraft({ post, analysis, brand });
+    const reviewRaw = demoReview([d.headline, d.body, ...(d.slides ?? [])].join("\n"), brand.positioning, `${post.id}:${brand.name}`);
+    const review = reviewOf(reviewRaw);
     const latencyMs = Math.round(performance.now() - started);
     calls.push({
       tag: "draft",
@@ -143,6 +149,14 @@ export async function generateDraft(input: GenerateDraftInput): Promise<Generate
       response: { headline: d.headline, body: d.body, slides: d.slides },
       latencyMs,
       usage: { inputTokens: 900 + Math.round(seededRandom(`dtok:${post.id}`)() * 400), outputTokens: 220 },
+      model: "demo",
+    });
+    calls.push({
+      tag: "draft_judge",
+      request: { model: "demo", questions: { ...JUDGE_QUESTIONS, ...REVIEW_QUESTIONS }, note: "데모 모드 — 휴리스틱 재판정·심사" },
+      response: { answers: reviewRaw, matchScore: d.matchScore, review },
+      latencyMs: 40,
+      usage: { inputTokens: 700, outputTokens: 0 },
       model: "demo",
     });
     return {
@@ -156,6 +170,7 @@ export async function generateDraft(input: GenerateDraftInput): Promise<Generate
         slides: d.slides,
         matchScore: d.matchScore,
         model: "demo",
+        review,
       },
       calls,
     };
@@ -185,27 +200,35 @@ export async function generateDraft(input: GenerateDraftInput): Promise<Generate
     model: gen.response.modelId || model,
   });
 
-  // 2) jev 로 원본 대비 구조 일치도 재판정
+  // 2) jev 로 원본 대비 구조 일치도 + 적합성 심사를 한 호출에 재판정
   const jev = jevModelId();
   const state: Record<string, JSONValue> = {
     original: postToState(post),
     draft: { headline: object.headline, body: object.body, ...(slides ? { slides } : {}) },
     our_brand: { name: brand.name, category: brand.category, positioning: brand.positioning },
   };
-  const t1 = performance.now();
-  const judged = await evaluate({ model: jev, state, questions: JUDGE_QUESTIONS, abortSignal: signal, maxRetries: 1 });
-  const judgeLatency = Math.round(performance.now() - t1);
-  const structure = judged.answers.structure_match.score / (JUDGE_QUESTIONS.structure_match.criteria.length - 1);
-  const sameHook = judged.answers.same_hook.probability;
-  const brandFit = judged.answers.brand_fit.probability;
+  const questions = { ...JUDGE_QUESTIONS, ...REVIEW_QUESTIONS } as const;
+  const judged = await runEvaluate(state, questions, { signal, model: jev });
+  const a = judged.answers;
+  const structureRaw = a.structure_match.type === "score" ? a.structure_match.score : 0;
+  const structure = structureRaw / (JUDGE_QUESTIONS.structure_match.criteria.length - 1);
+  const sameHook = a.same_hook.type === "boolean" ? a.same_hook.probability : 0;
+  const brandFit = a.brand_fit.type === "boolean" ? a.brand_fit.probability : 0;
   const matchScore = Math.round(Math.max(0, Math.min(100, structure * 60 + sameHook * 25 + brandFit * 15)));
+  const review = reviewOf({
+    brand_safety: a.brand_safety,
+    claim_risk: a.claim_risk,
+    audience_match: a.audience_match,
+    contradicts_positioning: a.contradicts_positioning,
+    quality: a.quality,
+  });
   calls.push({
     tag: "draft_judge",
-    request: { model: jev, state, questions: JUDGE_QUESTIONS },
-    response: { answers: judged.answers, usage: judged.usage },
-    latencyMs: judgeLatency,
-    usage: { inputTokens: judged.usage.inputTokens ?? 0, outputTokens: judged.usage.outputTokens ?? 0 },
-    model: judged.response.modelId || jev,
+    request: { model: jev, state, questions },
+    response: { answers: a, usage: judged.usage, matchScore, review, ...(judged.providerConfidence ? { confidence: judged.providerConfidence } : {}) },
+    latencyMs: judged.latencyMs,
+    usage: judged.usage,
+    model: judged.model,
   });
 
   return {
@@ -219,9 +242,27 @@ export async function generateDraft(input: GenerateDraftInput): Promise<Generate
       slides,
       matchScore,
       model: gen.response.modelId || model,
+      review,
     },
     calls,
   };
+}
+
+type RawBool = { type: string; probability?: number };
+type RawScore = { type: string; score?: number };
+
+/** 심사 원시 답변 → DraftReview (결정 규칙은 lib/judge.ts) */
+function reviewOf(raw: { brand_safety: RawBool; claim_risk: RawBool; audience_match: RawBool; contradicts_positioning: RawBool; quality: RawScore }): DraftReview {
+  const p = (b: RawBool, fallback: number) => (typeof b.probability === "number" && Number.isFinite(b.probability) ? Math.max(0, Math.min(1, b.probability)) : fallback);
+  const q = typeof raw.quality.score === "number" && Number.isFinite(raw.quality.score) ? Math.max(0, Math.min(REVIEW_QUALITY_MAX, raw.quality.score)) : REVIEW_QUALITY_MAX / 2;
+  return decideDraftReview({
+    brandSafety: p(raw.brand_safety, 1),
+    claimRisk: p(raw.claim_risk, 0),
+    audienceMatch: p(raw.audience_match, 1),
+    contradictsPositioning: p(raw.contradicts_positioning, 0),
+    quality: q,
+    qualityMax: REVIEW_QUALITY_MAX,
+  });
 }
 
 function sleep(ms: number, signal?: AbortSignal): Promise<void> {

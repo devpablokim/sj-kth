@@ -1,9 +1,11 @@
 /**
- * 판정 결과 → 종합 점수/확신도/한 줄 요약 (서버·클라이언트 공용 순수 함수).
- * benchmarkScore: 0~100 "따라 할 가치". confidence: 0~1 질문별 확신도 평균.
- * summarize: 규칙 기반 한국어 한 줄 요약.
+ * 판정 결과 → 종합 점수/확신도/구간/한 줄 요약 (서버·클라이언트 공용 순수 함수).
+ *  - benchmarkScore: 0~100 "따라 할 가치" (프리셋별 가중치 — composite scoring 패턴: 가중치는 코드가 소유)
+ *  - confidence: 0~1 질문별 확신도 평균 (모델 confidence 우선, 없으면 분포에서 계산)
+ *  - bandOf: 확신도 → auto / review / uncertain (confidence-gated routing 패턴)
+ *  - summarize: 규칙 기반 한국어 한 줄 요약
  */
-import type { Judgement, Post, QuestionId } from "./types";
+import type { ConfidenceBand, Judgement, JudgeOptions, Post, QuestionId, ScoringPreset } from "./types";
 
 type Answers = Record<QuestionId, Judgement>;
 
@@ -20,7 +22,7 @@ function choice(j: Judgement | undefined): string {
   return j && j.type === "choice" ? j.choice : "none";
 }
 
-/** 판정 1개의 확신도 (0~1) */
+/** 판정 1개의 확신도 (0~1) — 분포가 한쪽에 몰릴수록 1 */
 export function confidenceOf(j: Judgement): number {
   switch (j.type) {
     case "boolean":
@@ -37,26 +39,70 @@ export function confidenceOf(j: Judgement): number {
   }
 }
 
-/** 질문 전체 확신도 평균 */
-export function confidenceOfAll(answers: Answers): number {
-  const vals = Object.values(answers).map(confidenceOf);
-  if (vals.length === 0) return 0;
-  return vals.reduce((a, b) => a + b, 0) / vals.length;
+/**
+ * 질문 전체 확신도 평균. providerConfidence(typesafe 가 준 질문별 confidence)가 있으면
+ * 그 값을 우선 쓰고, 없는 질문만 분포에서 계산합니다.
+ */
+export function confidenceOfAll(answers: Record<string, Judgement>, providerConfidence?: Record<string, number>): number {
+  const ids = Object.keys(answers);
+  if (ids.length === 0) return 0;
+  let sum = 0;
+  for (const id of ids) {
+    const pc = providerConfidence?.[id];
+    sum += typeof pc === "number" ? pc : confidenceOf(answers[id]);
+  }
+  return sum / ids.length;
+}
+
+/** 확신도 → 구간 */
+export function bandOf(confidence: number, thresholds: JudgeOptions["thresholds"]): ConfidenceBand {
+  if (confidence >= thresholds.auto) return "auto";
+  if (confidence >= thresholds.review) return "review";
+  return "uncertain";
+}
+
+export const BAND_LABEL_KO: Record<ConfidenceBand, string> = {
+  auto: "자동 채택",
+  review: "검토 권장",
+  uncertain: "불확실",
+};
+
+/** 프리셋별 가중치 (합 100). engagement 는 구조 60 + 반응 지표 40 */
+const WEIGHTS: Record<ScoringPreset, Record<"imitability" | "make_draft" | "cta_strength" | "clarity" | "pain_point" | "social_proof" | "urgency", number>> = {
+  imitate: { imitability: 30, make_draft: 20, cta_strength: 15, clarity: 15, pain_point: 10, social_proof: 5, urgency: 5 },
+  convert: { imitability: 10, make_draft: 5, cta_strength: 30, clarity: 15, pain_point: 20, social_proof: 10, urgency: 10 },
+  engagement: { imitability: 18, make_draft: 12, cta_strength: 9, clarity: 9, pain_point: 6, social_proof: 3, urgency: 3 },
+};
+
+export const PRESET_LABEL_KO: Record<ScoringPreset, string> = {
+  imitate: "모방 우선 — 구조 재사용성·시안 가치",
+  convert: "전환 우선 — CTA·페인포인트·긴급성",
+  engagement: "반응 우선 — 구조 60 + 좋아요·조회수 40",
+};
+
+/** 반응 지표 → 0~1 (로그 스케일, 가중 반응 10만 ≈ 1.0). 지표가 없으면 0 */
+export function engagementOf(metrics: Post["metrics"] | undefined): number {
+  if (!metrics) return 0;
+  const weighted = (metrics.likes ?? 0) + (metrics.comments ?? 0) * 3 + (metrics.shares ?? 0) * 5 + (metrics.views ?? 0) / 50;
+  if (weighted <= 0) return 0;
+  return Math.max(0, Math.min(1, Math.log10(1 + weighted) / 5));
 }
 
 /**
- * 0~100 종합 점수. 가중치:
+ * 0~100 종합 점수. 기본(imitate) 가중치:
  *  imitability 30 · make_draft 20 · cta 15 · clarity 15 · pain_point 10 · social_proof 5 · urgency 5
  */
-export function benchmarkScore(answers: Answers): number {
-  const s =
-    ratio(answers.imitability) * 30 +
-    prob(answers.make_draft) * 20 +
-    ratio(answers.cta_strength) * 15 +
-    ratio(answers.clarity) * 15 +
-    prob(answers.pain_point) * 10 +
-    prob(answers.social_proof) * 5 +
-    prob(answers.urgency) * 5;
+export function benchmarkScore(answers: Answers, preset: ScoringPreset = "imitate", metrics?: Post["metrics"]): number {
+  const w = WEIGHTS[preset];
+  let s =
+    ratio(answers.imitability) * w.imitability +
+    prob(answers.make_draft) * w.make_draft +
+    ratio(answers.cta_strength) * w.cta_strength +
+    ratio(answers.clarity) * w.clarity +
+    prob(answers.pain_point) * w.pain_point +
+    prob(answers.social_proof) * w.social_proof +
+    prob(answers.urgency) * w.urgency;
+  if (preset === "engagement") s += engagementOf(metrics) * 40;
   return Math.round(Math.max(0, Math.min(100, s)));
 }
 
@@ -90,6 +136,15 @@ const TONE_KO: Record<string, string> = {
 export const HOOK_LABEL_KO = HOOK_KO;
 export const FORMAT_LABEL_KO = FORMAT_KO;
 export const TONE_LABEL_KO = TONE_KO;
+
+export const KIND_LABEL_KO: Record<string, string> = {
+  marketing: "마케팅",
+  educational: "정보/교육",
+  personal: "개인 글",
+  news: "뉴스",
+  spam: "스팸",
+  uncertain: "불확실",
+};
 
 /** 규칙 기반 한 줄 요약 */
 export function summarize(post: Post, answers: Answers): string {

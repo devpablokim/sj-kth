@@ -1,5 +1,5 @@
 /*
- * Dashboard — 클라이언트 루트. useRun 으로 SSE 실행 상태를 갖고, 브랜드 폼 · 불러온 포스트(+출처) · 선택 타일 ·
+ * Dashboard — 클라이언트 루트. useRun 으로 SSE 실행 상태를 갖고, 브랜드 폼(+판정 옵션) · 불러온 포스트(+출처, 기본 "실제 수집") · 선택 타일 ·
  * 열린 포스트 상세(PostDrawer) · 열린 시안(DraftDrawer) · 경과 타이머(100ms)를 관리하며
  * Header / HelpPanel / RunControls / StatTiles / 2열 그리드 / CallLog 를 조립합니다.
  * ≥1024px: 좌 47% ContentFeed, 우 53% (AnalyzingPanel · Breakdown · Drafts). 그 아래 전폭 CallLog.
@@ -9,6 +9,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import type { CallLogEntry, Draft, Post, PostSource, RunRequest } from "@/lib/types";
+import { DEFAULT_JUDGE_OPTIONS } from "@/lib/types";
 import { useRun } from "@/lib/client/useRun";
 import { SAMPLE_POSTS } from "@/data/samplePosts";
 import Header from "./Header";
@@ -41,12 +42,13 @@ function parseHealth(v: unknown): Health | null {
   };
 }
 
-/** 비워 두어 placeholder("예: …")가 입력 안내 역할을 하도록 함 — 브랜드명을 채워야 RUN 이 활성화 */
+/** 예시 브랜드: 하비탄AI (https://hobbytan.com) — 브랜드명을 채워야 RUN 이 활성화 */
 const DEFAULT_FORM: BrandForm = {
   name: "하비탄AI",
   category: "AI 전환(AX) 컨설팅 · 기업 AI 교육",
   positioning: "우리 팀이 직접 만들고 관리할 수 있는 AI 전환 — 업무 진단부터 슈퍼AI워크샵, 공동 개발, 내재화까지",
   draftCount: 3,
+  options: DEFAULT_JUDGE_OPTIONS,
 };
 
 /** RunControls 의 "현재 분석 대상" 라벨 */
@@ -55,13 +57,18 @@ const SOURCE_LABEL: Record<PostSource, string> = {
   generated: "카테고리 예시 생성 (AI · 실제 게시물 아님)",
   pasted: "직접 붙여넣기",
   youtube: "YouTube 검색",
+  collected: "실제 게시물 (무료 수집)",
 };
 
+const EMPTY_HINT =
+  "아직 수집 전입니다. 위 '실제 수집 (무료)'에서 '수집 후 분석 실행'을 누르면 YouTube · Threads 검색과 넣어 둔 계정 · 게시물 URL 에서 실제 게시물을 가져와 바로 판정합니다. 먼저 화면만 보려면 '샘플 48건' 탭을 고르세요.";
+
 export default function Dashboard() {
-  const { state, start, stop, setPosts, clearCalls, addDraft, addCalls } = useRun(SAMPLE_POSTS);
+  // 기본은 "실제 수집" — 수집 전에는 비어 있고, 샘플은 탭에서 골랐을 때만 채웁니다
+  const { state, start, stop, setPosts, clearCalls, addDraft, addCalls } = useRun([]);
   const [form, setForm] = useState<BrandForm>(DEFAULT_FORM);
   const [customPosts, setCustomPosts] = useState<Post[] | null>(null);
-  const [source, setSource] = useState<PostSource>("sample");
+  const [source, setSource] = useState<PostSource>("collected");
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [openPost, setOpenPost] = useState<Post | null>(null);
   const [openDraft, setOpenDraft] = useState<Draft | null>(null);
@@ -113,7 +120,7 @@ export default function Dashboard() {
       setSelectedId(null);
       setOpenPost(null);
       setOpenDraft(null);
-      void start(request, customPosts ?? SAMPLE_POSTS);
+      void start(request, request.posts ?? customPosts ?? SAMPLE_POSTS);
     },
     [start, customPosts],
   );
@@ -179,7 +186,7 @@ export default function Dashboard() {
         onStop={stop}
         postsCount={state.posts.length}
         mode={mode}
-        sourceLabel={SOURCE_LABEL[source]}
+        sourceLabel={state.posts.length === 0 && source === "collected" ? "실제 수집 — 아직 수집 전" : SOURCE_LABEL[source]}
       />
 
       {state.errors.length > 0 && (
@@ -197,14 +204,16 @@ export default function Dashboard() {
         <ContentFeed
           posts={state.posts}
           analyses={state.analyses}
+          skipped={state.skipped}
           inFlight={state.inFlight}
           errorIds={errorIds}
           selectedId={selectedId}
           onSelect={onSelectPost}
+          emptyHint={source === "collected" ? EMPTY_HINT : undefined}
         />
         <div className="flex min-w-0 flex-col gap-3">
           <AnalyzingPanel post={shownPost} analysis={shownAnalysis} analyzing={shownAnalyzing} />
-          <Breakdown posts={state.posts} analyses={state.analyses} />
+          <Breakdown posts={state.posts} analyses={state.analyses} skipped={state.skipped} />
           <Drafts
             drafts={state.drafts}
             drafting={state.drafting}
@@ -221,6 +230,7 @@ export default function Dashboard() {
         <PostDrawer
           post={openPost}
           analysis={state.analyses.get(openPost.id) ?? null}
+          skipped={state.skipped.get(openPost.id) ?? null}
           brand={{ name: form.name, category: form.category, positioning: form.positioning }}
           existingDraft={state.drafts.find((d) => d.sourcePostId === openPost.id) ?? null}
           onClose={closePost}
