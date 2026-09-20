@@ -1,56 +1,60 @@
-/** 날짜로 취급할 컬럼명 패턴 (시트 공통) */
-export const DATE_RE =
-  /일자|기준일|입사일|취득일|계약일|착수일|준공|수금일|지급\(예정\)일|점검일|만기일/;
+/*
+ * 표시용 포맷 유틸 — 숫자 콤마, 초/ms, USD, 퍼센트.
+ * 서버/클라이언트 어디서나 import 가능한 순수 함수만 둡니다.
+ */
 
-/** 금액으로 취급할 컬럼명 패턴 (시트 공통) */
-export const MONEY_RE =
-  /공급가액|부가세|합계|수금액|미수잔액|금액|잔액|기본급|제수당|월급여|취득가|계약금액|매출누계/;
-
-const pad = (x: number) => String(x).padStart(2, "0");
-
-/** 엑셀 날짜 일련번호(1900 체계) → yyyy-mm-dd. 타임존 영향 없음 */
-export function serialToIso(n: number): string {
-  const d = new Date(Math.round((n - 25569) * 86400000));
-  return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`;
+/** 정수 콤마 표기: 121176 → "121,176" */
+export function fmtInt(n: number | undefined | null): string {
+  if (n === undefined || n === null || !Number.isFinite(n)) return "0";
+  return Math.round(n).toLocaleString("en-US");
 }
 
-export function num(v: unknown): number {
-  if (typeof v === "number" && Number.isFinite(v)) return v;
-  if (typeof v === "string") {
-    const n = Number(v.replace(/[,원\s]/g, ""));
-    return Number.isFinite(n) ? n : 0;
-  }
-  return 0;
+/** 소수점 고정 표기 (기본 1자리): 75.735 → "75.7" */
+export function fmtFixed(n: number | undefined | null, digits = 1): string {
+  if (n === undefined || n === null || !Number.isFinite(n)) return (0).toFixed(digits);
+  return n.toFixed(digits);
 }
 
-export function dateOf(v: unknown): Date | null {
-  if (v instanceof Date) return v;
-  if (typeof v === "string") {
-    const m = v.match(/^(\d{4})[-./](\d{1,2})[-./](\d{1,2})/);
-    if (m) return new Date(+m[1], +m[2] - 1, +m[3]);
-  }
-  if (typeof v === "number" && v > 20000 && v < 80000) {
-    // 엑셀 날짜 일련번호 (1900 체계)
-    const d = new Date(Math.round((v - 25569) * 86400000));
-    return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
-  }
-  return null;
+/** ms → 초 표기: 22480 → "22.5" */
+export function fmtSec(ms: number | undefined | null, digits = 1): string {
+  if (!ms || !Number.isFinite(ms)) return (0).toFixed(digits);
+  return (ms / 1000).toFixed(digits);
 }
 
-export function fmtMoney(n: number): string {
-  return new Intl.NumberFormat("ko-KR").format(Math.round(n));
+/** ms 정수 표기: 109.4 → "109" */
+export function fmtMs(ms: number | undefined | null): string {
+  if (!ms || !Number.isFinite(ms)) return "0";
+  return String(Math.round(ms));
 }
 
-export function fmtCompact(n: number): string {
-  const abs = Math.abs(n);
-  if (abs >= 1e8) return `${(n / 1e8).toFixed(1).replace(/\.0$/, "")}억`;
-  if (abs >= 1e4) return `${fmtMoney(n / 1e4)}만`;
-  return fmtMoney(n);
+/** USD 표기. 기본 소수 4자리이지만 1달러 이상이면 2자리: 0.0921 → "$0.0921" */
+export function fmtUsd(usd: number | undefined | null, digits = 4): string {
+  if (!usd || !Number.isFinite(usd)) return `$${(0).toFixed(Math.min(digits, 2))}`;
+  const d = usd >= 1 ? 2 : digits;
+  return `$${usd.toFixed(d)}`;
 }
 
-export function fmtDate(v: unknown): string {
-  if (typeof v === "number" && v > 20000 && v < 80000) return serialToIso(v);
-  const d = dateOf(v);
-  if (!d) return String(v ?? "");
-  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+/** 0~1 확률 → "42%" */
+export function fmtPct(p: number | undefined | null, digits = 0): string {
+  if (p === undefined || p === null || !Number.isFinite(p)) return "0%";
+  return `${(Math.max(0, Math.min(1, p)) * 100).toFixed(digits)}%`;
+}
+
+/** 0~100 점수 → "78%" */
+export function fmtScorePct(score: number | undefined | null): string {
+  if (score === undefined || score === null || !Number.isFinite(score)) return "0%";
+  return `${Math.round(Math.max(0, Math.min(100, score)))}%`;
+}
+
+/** 텍스트 앞부분 자르기 (타일용): 줄바꿈 제거 후 n자 + "…" */
+export function truncate(text: string, n: number): string {
+  const flat = text.replace(/\s+/g, " ").trim();
+  // 이모지 등 서로게이트 쌍 중간에서 잘리지 않도록 코드포인트 단위로 자름 (SSR/CSR 불일치 방지)
+  const chars = Array.from(flat);
+  return chars.length > n ? `${chars.slice(0, n).join("")}…` : flat;
+}
+
+/** snake_case 선택지 → 표시용: "how_to" → "how-to" */
+export function choiceLabel(choice: string): string {
+  return choice.replace(/_/g, "-");
 }

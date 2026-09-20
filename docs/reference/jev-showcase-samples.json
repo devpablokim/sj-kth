@@ -1,0 +1,400 @@
+{
+  "reviews": {
+    "request": {
+      "tag": "reviews",
+      "state": {
+        "context": "네이버 영화 리뷰 감정 분류"
+      },
+      "questions": {
+        "r1": {
+          "type": "choice",
+          "instructions": "다음 한국어 영화 리뷰의 감정은?\n리뷰: 제목만 보고 영화를 봤는데 보는 내내 지루",
+          "criteria": {
+            "pos": "긍정적인 평가",
+            "neg": "부정적인 평가"
+          }
+        },
+        "r2": {
+          "type": "choice",
+          "instructions": "다음 한국어 영화 리뷰의 감정은?\n리뷰: 하정우 연기 짱이심 진짜",
+          "criteria": {
+            "pos": "긍정적인 평가",
+            "neg": "부정적인 평가"
+          }
+        },
+        "r3": {
+          "type": "choice",
+          "instructions": "다음 한국어 영화 리뷰의 감정은?\n리뷰: 넘흐넘흐 조아효...",
+          "criteria": {
+            "pos": "긍정적인 평가",
+            "neg": "부정적인 평가"
+          }
+        }
+      },
+      "_note": "10개 질문 중 3개만 표시"
+    },
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "r1": {
+          "type": "choice",
+          "choice": "neg",
+          "confidence": 1,
+          "probabilities": {
+            "neg": 1,
+            "pos": 0
+          }
+        },
+        "r2": {
+          "type": "choice",
+          "choice": "pos",
+          "confidence": 1,
+          "probabilities": {
+            "pos": 1,
+            "neg": 0
+          }
+        },
+        "r3": {
+          "type": "choice",
+          "choice": "pos",
+          "confidence": 0.82,
+          "probabilities": {
+            "neg": 0.09,
+            "pos": 0.91
+          }
+        }
+      },
+      "usage": {
+        "input_tokens": 1090,
+        "output_tokens": 294
+      },
+      "_meta": {
+        "upstreamMs": 457,
+        "tokens": 1090,
+        "krw": 0.0632,
+        "tag": "reviews",
+        "attempt": 0
+      }
+    }
+  },
+  "smishing": {
+    "request": {
+      "tag": "smishing",
+      "state": {
+        "context": "한국 휴대폰 문자 메시지 분류"
+      },
+      "questions": {
+        "m1": {
+          "type": "choice",
+          "instructions": "다음 문자는 어떤 종류인가?\n문자: 내일 7시 강남역 2번 출구에서 보자. 늦으면 톡할게",
+          "criteria": {
+            "smishing": "피싱·스미싱 사기. 기관·택배·가족을 사칭해 링크 클릭이나 인증번호·송금을 유도한다. 가짜 도메인·단축링크가 붙거나, 링크 없이 결제·승인·계정 문제를 알리며 낯선 070/010 번호로 연락을 유도한다",
+            "ad": "기업·매장의 정상 광고. (광고) 표기와 무료수신거부 번호가 있고 할인·쿠폰·멤버십 혜택만 안내한다. 금전이나 인증번호를 요구하지 않는다",
+            "normal": "지인 대화, 업무 공지, 병원·관리사무소 안내, 은행 입출금 알림, 배송 완료 통지 등 일상 문자"
+          }
+        },
+        "m2": {
+          "type": "choice",
+          "instructions": "다음 문자는 어떤 종류인가?\n문자: [Web발신] 고객님 택배 주소지 불일치로 반송 처리되었습니다. 주소 재확인 hxxp://cj-tr.xyz/4kq",
+          "criteria": {
+            "smishing": "피싱·스미싱 사기. 기관·택배·가족을 사칭해 링크 클릭이나 인증번호·송금을 유도한다. 가짜 도메인·단축링크가 붙거나, 링크 없이 결제·승인·계정 문제를 알리며 낯선 070/010 번호로 연락을 유도한다",
+            "ad": "기업·매장의 정상 광고. (광고) 표기와 무료수신거부 번호가 있고 할인·쿠폰·멤버십 혜택만 안내한다. 금전이나 인증번호를 요구하지 않는다",
+            "normal": "지인 대화, 업무 공지, 병원·관리사무소 안내, 은행 입출금 알림, 배송 완료 통지 등 일상 문자"
+          }
+        },
+        "m3": {
+          "type": "choice",
+          "instructions": "다음 문자는 어떤 종류인가?\n문자: (광고)[GS25] 오늘만 도시락 2+1, 원두커피 50% 할인. 무료수신거부 080-000-1188",
+          "criteria": {
+            "smishing": "피싱·스미싱 사기. 기관·택배·가족을 사칭해 링크 클릭이나 인증번호·송금을 유도한다. 가짜 도메인·단축링크가 붙거나, 링크 없이 결제·승인·계정 문제를 알리며 낯선 070/010 번호로 연락을 유도한다",
+            "ad": "기업·매장의 정상 광고. (광고) 표기와 무료수신거부 번호가 있고 할인·쿠폰·멤버십 혜택만 안내한다. 금전이나 인증번호를 요구하지 않는다",
+            "normal": "지인 대화, 업무 공지, 병원·관리사무소 안내, 은행 입출금 알림, 배송 완료 통지 등 일상 문자"
+          }
+        }
+      },
+      "_note": "9개 질문 중 3개만 표시"
+    },
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "m1": {
+          "type": "choice",
+          "choice": "normal",
+          "confidence": 1,
+          "probabilities": {
+            "ad": 0,
+            "smishing": 0,
+            "normal": 1
+          }
+        },
+        "m2": {
+          "type": "choice",
+          "choice": "smishing",
+          "confidence": 1,
+          "probabilities": {
+            "ad": 0,
+            "smishing": 1,
+            "normal": 0
+          }
+        },
+        "m3": {
+          "type": "choice",
+          "choice": "ad",
+          "confidence": 1,
+          "probabilities": {
+            "ad": 1,
+            "smishing": 0,
+            "normal": 0
+          }
+        }
+      },
+      "usage": {
+        "input_tokens": 2741,
+        "output_tokens": 327
+      },
+      "_meta": {
+        "upstreamMs": 516,
+        "tokens": 2741,
+        "krw": 0.1589,
+        "tag": "smishing",
+        "attempt": 0
+      }
+    }
+  },
+  "live": {
+    "request": {
+      "tag": "live",
+      "state": {
+        "text": "환불 언제 되나요? 벌써 3주째 기다리는 중인데 진짜 화나네요"
+      },
+      "questions": {
+        "emotion": {
+          "type": "choice",
+          "instructions": "이 문장을 쓴 사람의 주된 감정은 무엇인가? 문장: \"환불 언제 되나요? 벌써 3주째 기다리는 중인데 진짜 화나네요\"",
+          "criteria": {
+            "joy": "기쁨·만족",
+            "anger": "분노·짜증",
+            "sadness": "슬픔·실망",
+            "anxiety": "불안·걱정",
+            "neutral": "중립·담담"
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "instructions": "이 문장이 요구하는 대응의 급박함은 어느 정도인가? 문장: \"환불 언제 되나요? 벌써 3주째 기다리는 중인데 진짜 화나네요\"",
+          "criteria": [
+            "급하지 않음",
+            "다소 급함",
+            "매우 급함·즉시 대응 필요"
+          ]
+        },
+        "intent": {
+          "type": "choice",
+          "instructions": "이 문장을 쓴 사람의 의도는 무엇인가? 문장: \"환불 언제 되나요? 벌써 3주째 기다리는 중인데 진짜 화나네요\"",
+          "criteria": {
+            "question": "질문",
+            "complaint": "불만·항의",
+            "praise": "칭찬·감사",
+            "request": "요청·부탁",
+            "chat": "잡담·기타"
+          }
+        },
+        "profanity": {
+          "type": "noul",
+          "instructions": "욕설·비속어가 포함되어 있는가? 문장: \"환불 언제 되나요? 벌써 3주째 기다리는 중인데 진짜 화나네요\"",
+          "criteria": {
+            "true": "욕설·비속어가 있다",
+            "false": "욕설·비속어가 없다"
+          }
+        },
+        "risk": {
+          "type": "noul",
+          "instructions": "자해·타해·범죄 등 즉시 대응이 필요한 위험 신호가 있는가? 문장: \"환불 언제 되나요? 벌써 3주째 기다리는 중인데 진짜 화나네요\"",
+          "criteria": {
+            "true": "위험 신호가 있다",
+            "false": "위험 신호가 없다"
+          }
+        }
+      }
+    },
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "emotion": {
+          "type": "choice",
+          "choice": "anger",
+          "confidence": 1,
+          "probabilities": {
+            "joy": 0,
+            "anger": 1,
+            "sadness": 0,
+            "neutral": 0,
+            "anxiety": 0
+          }
+        },
+        "urgency": {
+          "type": "score",
+          "score": 1.71,
+          "confidence": 0.57,
+          "legend": {
+            "0": "급하지 않음",
+            "1": "다소 급함",
+            "2": "매우 급함·즉시 대응 필요"
+          },
+          "probabilities": {
+            "0": 0,
+            "1": 0.29,
+            "2": 0.71
+          }
+        },
+        "intent": {
+          "type": "choice",
+          "choice": "complaint",
+          "confidence": 0.97,
+          "probabilities": {
+            "complaint": 0.98,
+            "chat": 0,
+            "request": 0,
+            "praise": 0,
+            "question": 0.02
+          }
+        },
+        "profanity": {
+          "type": "noul",
+          "noul": 0.04
+        },
+        "risk": {
+          "type": "noul",
+          "noul": 0.02
+        }
+      },
+      "usage": {
+        "input_tokens": 869,
+        "output_tokens": 156
+      },
+      "_meta": {
+        "upstreamMs": 477,
+        "tokens": 869,
+        "krw": 0.0504,
+        "tag": "live",
+        "attempt": 0
+      }
+    }
+  },
+  "wordle": {
+    "request": {
+      "tag": "wordle",
+      "state": {
+        "game": "wordle",
+        "turn": 1,
+        "remainingCount": 2315,
+        "history": [],
+        "candidates": [
+          {
+            "id": "w1",
+            "word": "roate",
+            "possibleAnswer": false,
+            "newLetters": 5,
+            "expectedRemaining": 62.4
+          },
+          {
+            "id": "w2",
+            "word": "slate",
+            "possibleAnswer": true,
+            "newLetters": 5,
+            "expectedRemaining": 75.1
+          },
+          {
+            "id": "w3",
+            "word": "salet",
+            "possibleAnswer": false,
+            "newLetters": 5,
+            "expectedRemaining": 77.5
+          },
+          {
+            "id": "w4",
+            "word": "crane",
+            "possibleAnswer": true,
+            "newLetters": 5,
+            "expectedRemaining": 81.8
+          },
+          {
+            "id": "w5",
+            "word": "crate",
+            "possibleAnswer": true,
+            "newLetters": 5,
+            "expectedRemaining": 84.8
+          },
+          {
+            "id": "w6",
+            "word": "trace",
+            "possibleAnswer": true,
+            "newLetters": 5,
+            "expectedRemaining": 86.5
+          }
+        ],
+        "stamp": {
+          "gameId": 1,
+          "seq": 1,
+          "turn": 1
+        }
+      },
+      "questions": {
+        "guess": {
+          "type": "choice",
+          "instructions": "워들 1번째 추측을 고른다. 남은 정답 후보 2315개. 지난 추측(g=정확, y=글자만, -=없음): 없음. 남은 후보를 가장 많이 줄이면서도 지금 바로 맞힐 여지를 남기는 단어를 고른다. 「예상 남는 후보」가 작을수록 정보량이 크다.",
+          "criteria": {
+            "w1": "ROATE · 정보 수집 · 새 글자 5 · 예상 남는 후보 62.4",
+            "w2": "SLATE · 정답 가능 · 새 글자 5 · 예상 남는 후보 75.1",
+            "w3": "SALET · 정보 수집 · 새 글자 5 · 예상 남는 후보 77.5",
+            "w4": "CRANE · 정답 가능 · 새 글자 5 · 예상 남는 후보 81.8",
+            "w5": "CRATE · 정답 가능 · 새 글자 5 · 예상 남는 후보 84.8",
+            "w6": "TRACE · 정답 가능 · 새 글자 5 · 예상 남는 후보 86.5"
+          }
+        },
+        "solvedNext": {
+          "type": "noul",
+          "instructions": "방금 고른 추측이 곧바로 정답일 가능성이 높은가? 남은 후보 2315개와 지난 단서를 근거로 판단한다.",
+          "criteria": {
+            "true": "다음 추측이 정답일 가능성이 높다",
+            "false": "아직 정보를 모으는 단계다"
+          }
+        }
+      },
+      "_note": "2개 질문 중 2개만 표시"
+    },
+    "response": {
+      "model": "jev-1.13.0",
+      "answers": {
+        "guess": {
+          "type": "choice",
+          "choice": "w2",
+          "confidence": 0.4,
+          "probabilities": {
+            "w6": 0,
+            "w3": 0,
+            "w1": 0.48,
+            "w2": 0.51,
+            "w5": 0,
+            "w4": 0.01
+          }
+        },
+        "solvedNext": {
+          "type": "noul",
+          "noul": 0.08
+        }
+      },
+      "usage": {
+        "input_tokens": 1033,
+        "output_tokens": 86
+      },
+      "_meta": {
+        "upstreamMs": 239,
+        "tokens": 1033,
+        "krw": 0.0599,
+        "tag": "wordle",
+        "attempt": 0
+      }
+    }
+  }
+}

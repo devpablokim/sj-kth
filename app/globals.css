@@ -1,19 +1,153 @@
+/*
+ * 전역 스타일 — 레퍼런스(Flowsery JEV 데모)에서 추출한 디자인 토큰과
+ * 대시보드 전체에서 재사용하는 소형 유틸 클래스(.label / .panel / .bar / .bar-dashed).
+ * Tailwind v4 는 @theme 로 토큰을 노출해 text-ink, bg-accent 같은 유틸로도 쓸 수 있게 합니다.
+ */
 @import "tailwindcss";
 
-html {
-  font-family:
-    "Pretendard Variable",
-    Pretendard,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Apple SD Gothic Neo",
-    "Malgun Gothic",
-    "Segoe UI",
-    sans-serif;
-  color-scheme: light;
+@theme {
+  --color-page: #f3f3f1;
+  --color-panel: #ffffff;
+  --color-line: #e4e4e0;
+  --color-ink: #111111;
+  --color-muted: #8a8a86;
+  --color-faint: #c9c9c4;
+  --color-accent: #ff4d2e;
+  --color-ok: #1a9e5c;
+  --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --font-sans: Inter, system-ui, -apple-system, "Segoe UI", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+:root {
+  --page: #f3f3f1;
+  --panel: #ffffff;
+  --line: #e4e4e0;
+  --ink: #111111;
+  --muted: #8a8a86;
+  --accent: #ff4d2e;
+  --radius: 6px;
+}
+
+html,
 body {
-  background-color: #f1f5f9;
-  color: #1e293b;
+  background: var(--page);
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+@layer components {
+  /* 10px 대문자 회색 모노스페이스 라벨 (REPLAY EVENTS READ 같은 것) */
+  .label {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* 흰 패널 카드 */
+  .panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+
+  /* 검정 실선 막대 — 점수/확률 기본 표기 */
+  .bar {
+    display: block;
+    height: 5px;
+    background: var(--ink);
+    border-radius: 1px;
+    transition: width 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* 빨강 점선 막대 — "따라 해야 할 강점" */
+  .bar-dashed {
+    display: block;
+    height: 5px;
+    border-radius: 1px;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--accent) 0,
+      var(--accent) 4px,
+      transparent 4px,
+      transparent 7px
+    );
+    transition: width 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* 막대가 놓이는 트랙 (아주 옅은 배경) */
+  .bar-track {
+    position: relative;
+    height: 5px;
+    background: transparent;
+  }
+
+  /* 숫자 카운터 — 값이 바뀔 때 짧게 깜빡이는 느낌 */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .flick {
+    animation: tile-flick 180ms ease-out;
+  }
+
+  /* 분석 중 타일의 빨간 테두리 맥동 */
+  .ring-analyzing {
+    animation: ring-pulse 900ms ease-in-out infinite;
+  }
+
+  /* 슬라이드오버 진입 */
+  .drawer-in {
+    animation: drawer-in 180ms ease-out;
+  }
+
+  /* 얇은 스크롤바 (모자이크 / 드로어) */
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: #d6d6d1 transparent;
+  }
+}
+
+@keyframes tile-flick {
+  0% {
+    opacity: 0.35;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+@keyframes ring-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px var(--accent);
+  }
+  50% {
+    box-shadow: 0 0 0 2px var(--accent), 0 0 0 5px rgba(255, 77, 46, 0.18);
+  }
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+input:focus-visible,
+textarea:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 1px;
 }
