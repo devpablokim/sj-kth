@@ -60,7 +60,7 @@ export default function Drafts({ drafts, drafting, posts, onOpen, draftCount }: 
                   <button
                     type="button"
                     onClick={() => onOpen(d)}
-                    className="label mt-1.5 self-start !text-[9px] text-ink hover:underline"
+                    className="label mt-1.5 self-start !text-[9px] !text-ink hover:underline"
                     aria-label={`${src?.brand ?? d.sourcePostId} 벤치마크 시안 열기`}
                   >
                     open this draft

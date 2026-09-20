@@ -109,7 +109,9 @@ export default function AnalyzingPanel({ post, analysis, analyzing }: Props) {
         <div className="flex flex-col gap-3 sm:flex-row sm:gap-4">
           {/* 좌: 포스트 카드 */}
           <div className="min-w-0 sm:w-[200px] sm:shrink-0">
-            <PostTile post={post} size="md" status={pending ? "analyzing" : analysis ? "done" : "idle"} />
+            <div className="max-w-[260px] sm:max-w-none">
+              <PostTile post={post} size="md" status={pending ? "analyzing" : analysis ? "done" : "idle"} />
+            </div>
             <div className="mt-2 text-[16px] font-bold leading-tight text-ink">{post.brand}</div>
             <div className="mt-0.5 truncate text-[11px] text-muted">
               {post.handle} · {PLATFORM_NAME[post.platform]}
@@ -121,7 +123,7 @@ export default function AnalyzingPanel({ post, analysis, analyzing }: Props) {
                     {tagsOf(analysis).map((t) => (
                       <span
                         key={t}
-                        className="label inline-flex h-[16px] items-center rounded-[3px] border border-line px-1.5 !text-[8px] text-ink"
+                        className="label inline-flex h-[16px] items-center rounded-[3px] border border-line px-1.5 !text-[8px] !text-ink"
                       >
                         {t}
                       </span>

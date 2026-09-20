@@ -48,14 +48,31 @@ export default function DraftDrawer({ draft, sourcePost, onClose }: Props) {
   }, []);
 
   const copy = async () => {
+    const text = toPlainText(draft);
+    let ok = false;
     try {
-      await navigator.clipboard.writeText(toPlainText(draft));
-      setCopied(true);
-      if (timerRef.current !== null) window.clearTimeout(timerRef.current);
-      timerRef.current = window.setTimeout(() => setCopied(false), 1500);
+      await navigator.clipboard.writeText(text);
+      ok = true;
     } catch {
-      // 클립보드 권한이 없으면 조용히 무시
+      // 비보안 컨텍스트/권한 거부 시 textarea + execCommand 폴백
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        ta.setAttribute("readonly", "");
+        ta.style.position = "fixed";
+        ta.style.opacity = "0";
+        document.body.appendChild(ta);
+        ta.select();
+        ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+      } catch {
+        ok = false;
+      }
     }
+    if (!ok) return;
+    setCopied(true);
+    if (timerRef.current !== null) window.clearTimeout(timerRef.current);
+    timerRef.current = window.setTimeout(() => setCopied(false), 1500);
   };
 
   const formatKo = FORMAT_LABEL_KO[draft.format] ?? draft.format;
@@ -75,7 +92,7 @@ export default function DraftDrawer({ draft, sourcePost, onClose }: Props) {
           <button
             type="button"
             onClick={onClose}
-            className="label flex h-6 w-6 items-center justify-center rounded-[3px] border border-line !text-[12px] text-ink hover:border-ink"
+            className="label flex h-6 w-6 items-center justify-center rounded-[3px] border border-line !text-[12px] !text-ink hover:border-ink"
             aria-label="닫기"
           >
             ×
@@ -145,7 +162,7 @@ export default function DraftDrawer({ draft, sourcePost, onClose }: Props) {
           >
             {copied ? "복사됨" : "복사"}
           </button>
-          <button type="button" onClick={onClose} className={`${btnCls} border-line text-ink hover:border-ink`} aria-label="닫기">
+          <button type="button" onClick={onClose} className={`${btnCls} border-line !text-ink hover:border-ink`} aria-label="닫기">
             닫기
           </button>
           <span className="ml-auto text-[10px] text-muted">Esc 로 닫기</span>

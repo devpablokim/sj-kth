@@ -113,7 +113,7 @@ export default function CallLog({ calls, onClear }: Props) {
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className={`${btn} ${expanded ? "border-ink bg-ink !text-white" : "border-line text-ink hover:border-ink"}`}
+            className={`${btn} ${expanded ? "border-ink bg-ink !text-white" : "border-line !text-ink hover:border-ink"}`}
             aria-pressed={expanded}
             aria-label={expanded ? "요청/응답 JSON 접기" : "요청/응답 JSON 펼침"}
             disabled={calls.length === 0}
@@ -123,7 +123,7 @@ export default function CallLog({ calls, onClear }: Props) {
           <button
             type="button"
             onClick={onClear}
-            className={`${btn} border-line text-muted hover:border-ink hover:text-ink`}
+            className={`${btn} border-line hover:border-ink hover:!text-ink`}
             aria-label="호출 로그 지우기"
             disabled={calls.length === 0}
           >

@@ -52,6 +52,9 @@ export async function runPipeline(request: RunRequest, emit: Emit, signal: Abort
   const krw = krwPerUsd();
 
   const pricing: JevPricing = await loadPricing(mode, jevModel);
+  // 시안 생성 모델은 단가가 다르므로 별도 조회 (실패 시 jev 단가로 추정)
+  const draftPricing: JevPricing = mode === "live" ? await loadPricing(mode, draftModel) : pricing;
+  const pricingFor = (model: string): JevPricing => (model === draftPricing.modelId ? draftPricing : pricing);
 
   const stats: RunStats = {
     postsTotal: posts.length,
@@ -157,8 +160,7 @@ export async function runPipeline(request: RunRequest, emit: Emit, signal: Abort
       try {
         const { draft, calls } = await generateDraft({ post, analysis, brand: request.brand, mode, signal });
         for (const c of calls) {
-          // 시안 생성 모델은 jev 단가와 다르지만 가격표가 없으면 같은 추정 단가로 계산 (추정치 표기)
-          const costUsd = costFor(c.usage, pricing);
+          const costUsd = costFor(c.usage, pricingFor(c.model));
           addCost(costUsd);
           log({
             tag: c.tag,

@@ -279,6 +279,15 @@ function pick<T>(rand: () => number, arr: readonly T[]): T {
   return arr[Math.floor(rand() * arr.length) % arr.length];
 }
 
+/** 한국어 조사 "로/으로": 받침이 없거나 ㄹ 받침이면 "로", 그 외 "으로" */
+function withRo(word: string): string {
+  const last = word.trim().slice(-1);
+  const code = last.charCodeAt(0);
+  if (code < 0xac00 || code > 0xd7a3) return `${word}로`;
+  const jong = (code - 0xac00) % 28;
+  return jong === 0 || jong === 8 ? `${word}로` : `${word}으로`;
+}
+
 /** 훅 유형/톤/형식을 따라 우리 브랜드 버전의 시안을 템플릿으로 만듭니다. */
 export function demoDraft({ post, analysis, brand }: DemoDraftInput): DemoDraftOutput {
   const rand = seededRandom(`draft:${post.id}:${brand.name}`);
@@ -299,7 +308,7 @@ export function demoDraft({ post, analysis, brand }: DemoDraftInput): DemoDraftO
 
   const headlines: Record<string, string[]> = {
     question: [`퇴근 후 ${minutes}분, 아직도 그냥 흘려보내세요?`, `${category}, 왜 늘 작심삼일로 끝날까요?`],
-    number: [`직장인이 ${name}으로 바꾼 ${n}가지 퇴근 루틴`, `하루 ${minutes}분, ${n}주 만에 달라지는 이유`],
+    number: [`직장인이 ${withRo(name)} 바꾼 ${n}가지 퇴근 루틴`, `하루 ${minutes}분, ${n}주 만에 달라지는 이유`],
     contrarian: [`열심히 하는 게 문제였습니다 — ${name}이 다르게 하는 법`, `${category}는 의지력의 문제가 아닙니다`],
     story: [`야근 끝나고 ${name} 켠 지 ${n}주, 달라진 것들`, `퇴근길 ${minutes}분이 제 커리어를 바꿨습니다`],
     how_to: [`바쁜 직장인이 ${category}를 끝까지 하는 법`, `${minutes}분으로 ${category} 루틴 만드는 ${n}단계`],
@@ -316,7 +325,7 @@ export function demoDraft({ post, analysis, brand }: DemoDraftInput): DemoDraftO
     `저장해두고 오늘 퇴근 후 바로 ${name}에서 실행해보세요.`,
   ];
   const cta = pick(rand, ctaLines);
-  const proofLine = proof ? pick(rand, [`이미 ${pick(rand, [1200, 3400, 8700, 12000]).toLocaleString("ko-KR")}명의 직장인이 ${name}으로 루틴을 만들었어요.`, `수강생 만족도 ${pick(rand, [94, 96, 97])}% — 직장인 후기가 증명합니다.`]) : "";
+  const proofLine = proof ? pick(rand, [`이미 ${pick(rand, [1200, 3400, 8700, 12000]).toLocaleString("ko-KR")}명의 직장인이 ${withRo(name)} 루틴을 만들었어요.`, `수강생 만족도 ${pick(rand, [94, 96, 97])}% — 직장인 후기가 증명합니다.`]) : "";
   const urgencyLine = urgency ? pick(rand, ["이번 주 일요일까지 얼리버드 40% 할인.", "선착순 100명 한정, 마감되면 다음 시즌까지 기다려야 해요."]) : "";
 
   const painLine = pick(rand, [

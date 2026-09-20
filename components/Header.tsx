@@ -12,11 +12,11 @@ interface Props {
   mode: "live" | "demo" | null;
   jevModel: string | null;
   draftModel: string | null;
-  /** 누적 수집 포스트 수 (표시용) */
-  collected?: number;
+  /** 포스트 출처 — 샘플 데이터셋인지, 사용자가 붙여넣은 데이터인지 */
+  source?: "sample" | "custom";
 }
 
-export default function Header({ posts, mode, jevModel, draftModel, collected = 12480 }: Props) {
+export default function Header({ posts, mode, jevModel, draftModel, source = "sample" }: Props) {
   const brands = new Set(posts.map((p) => p.brand)).size;
   const platforms = new Set(posts.map((p) => p.platform)).size;
 
@@ -27,8 +27,8 @@ export default function Header({ posts, mode, jevModel, draftModel, collected = 
           find what makes them buy
         </h1>
         <p className="mt-1.5 text-[12px] leading-snug text-muted">
-          {fmtInt(collected)} collected posts · this run: {fmtInt(posts.length)} posts, {brands} brands,{" "}
-          {platforms} platforms · every hook, CTA and social proof
+          {source === "custom" ? "loaded posts" : "sample dataset"} · this run: {fmtInt(posts.length)} posts, {brands}{" "}
+          brands, {platforms} platforms · every hook, CTA and social proof
         </p>
       </div>
 
