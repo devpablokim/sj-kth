@@ -4,6 +4,8 @@
 
 export type Platform = "x" | "threads" | "youtube" | "instagram";
 
+export type PostSource = "sample" | "generated" | "pasted" | "youtube";
+
 export type PostFormat =
   | "card_news" // 카드뉴스(이미지 슬라이드)
   | "short_video" // 릴스/쇼츠/숏폼
@@ -31,6 +33,10 @@ export interface Post {
   /** 형식 힌트 (수집기가 알고 있으면 채움, jev가 다시 판정) */
   formatHint?: PostFormat;
   postedAt?: string; // ISO
+  /** 출처: 샘플 데이터 / AI 생성 예시 / 사용자가 붙여넣음 / YouTube 검색 수집 */
+  source?: PostSource;
+  /** true 면 실제 게시물이 아니라 AI 가 카테고리 예시로 만든 포스트 (UI 에 "예시" 배지) */
+  generated?: boolean;
   metrics?: {
     likes?: number;
     comments?: number;
@@ -155,4 +161,44 @@ export interface RunRequest {
   draftCount: number;
   /** 강제 데모 모드 (키 없이) */
   demo?: boolean;
+}
+
+/** POST /api/generate-set — 카테고리 기준 벤치마크 예시 세트 생성 요청 */
+export interface GenerateSetRequest {
+  brand: { name: string; category: string; positioning: string };
+  /** 벤치마크/경쟁 브랜드 이름 (선택, 최대 8개). 비우면 카테고리에 맞는 가상 브랜드를 만든다 */
+  competitors?: string[];
+  /** 12 · 24 · 48 */
+  count: number;
+  platforms?: Platform[];
+}
+
+export interface GenerateSetResponse {
+  posts: Post[];
+  model: string;
+  usage: { inputTokens: number; outputTokens: number };
+  costUsd: number;
+  latencyMs: number;
+  mode: "live" | "demo";
+}
+
+/** GET /api/collect/youtube?q=&max= — 실제 YouTube 영상 수집 결과 */
+export interface CollectResponse {
+  posts: Post[];
+  source: PostSource;
+  query: string;
+}
+
+/** POST /api/draft — 포스트 1건에 대한 시안 생성 요청/응답 */
+export interface DraftRequest {
+  post: Post;
+  analysis: PostAnalysis;
+  brand: { name: string; category: string; positioning: string };
+  demo?: boolean;
+}
+
+export interface DraftResponse {
+  draft: Draft;
+  calls: CallLogEntry[];
+  mode: "live" | "demo";
 }
