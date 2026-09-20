@@ -49,7 +49,9 @@ export function fmtScorePct(score: number | undefined | null): string {
 /** 텍스트 앞부분 자르기 (타일용): 줄바꿈 제거 후 n자 + "…" */
 export function truncate(text: string, n: number): string {
   const flat = text.replace(/\s+/g, " ").trim();
-  return flat.length > n ? `${flat.slice(0, n)}…` : flat;
+  // 이모지 등 서로게이트 쌍 중간에서 잘리지 않도록 코드포인트 단위로 자름 (SSR/CSR 불일치 방지)
+  const chars = Array.from(flat);
+  return chars.length > n ? `${chars.slice(0, n).join("")}…` : flat;
 }
 
 /** snake_case 선택지 → 표시용: "how_to" → "how-to" */
