@@ -498,7 +498,7 @@ export default function RunControls({
 
         <div className="mt-2 rounded-[4px] border border-line bg-page p-2.5" role="tabpanel">
           {benchMode === "sample" && (
-            <p className="text-[11px] leading-snug text-muted">생산성 앱 카테고리의 가상 브랜드 6곳 48건 (데모용)</p>
+            <p className="text-[11px] leading-snug text-muted">AI 전환 컨설팅 · 기업 AI 교육 카테고리의 가상 벤치마크 브랜드 6곳 48건 — 카드뉴스 · 마케팅 문구 · 광고 소재 (데모용, 실제 기업 아님)</p>
           )}
 
           {benchMode === "generate" && (
@@ -512,7 +512,7 @@ export default function RunControls({
                     onKeyDown={(e) => {
                       if (isEnter(e) && canGenerate) void generate();
                     }}
-                    placeholder="예: 패스트캠퍼스, 클래스101, 인프런"
+                    placeholder="예: 패스트캠퍼스, 러닝스푼즈, 인프런"
                     disabled={busy}
                   />
                 </Field>
@@ -551,7 +551,7 @@ export default function RunControls({
               </div>
               <p className="text-[11px] leading-snug text-muted">
                 입력한 카테고리와 브랜드를 참고해 AI가 벤치마크 스타일 포스트를 만들어 판정합니다. 실제 게시물이 아니며 모든
-                타일에 &lsquo;예시&rsquo; 표시가 붙습니다. 비용은 약 $0.05 (24건) 수준.
+                타일에 &lsquo;예시&rsquo; 표시가 붙습니다. 비용은 12건 약 $0.05 · 24건 약 $0.1 · 48건 약 $0.2 수준.
               </p>
               {mode === "demo" && (
                 <p className="text-[11px] leading-snug text-accent">

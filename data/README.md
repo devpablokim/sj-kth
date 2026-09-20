@@ -13,25 +13,24 @@
 
 ## 0. 샘플 데이터셋 (`samplePosts.ts`)
 
-- 카테고리: **직장인 대상 온라인 클래스 / 생산성 앱**
-- 가상 브랜드 6곳 × 8건 = 48건. 브랜드·인물·URL 은 전부 허구이며 `https://example.invalid/...` 형태입니다.
+- 카테고리: **AI 전환(AX) 컨설팅 · 기업 AI 교육** — 우리 브랜드 예시는 하비탄AI (https://hobbytan.com)
+- 가상 벤치마크 브랜드 6곳, 48건. 브랜드·인물·수치·URL 은 전부 허구(`https://example.invalid/...`)이며, 텍스트 모델의 도움을 받아
+  훅 유형 · CTA 강도 · 사회적 증거 · 긴급성 · 톤이 골고루 섞이도록 만든 데모용 예시입니다.
 
 | 브랜드 | 핸들 | 콘셉트 |
 |---|---|---|
-| 클래스온 | `@classon_kr` | 직장인 실무 온라인 클래스 (엑셀·PPT·데이터·노션) |
-| 노트플로우 | `@noteflow` | AI 회의록 / 노트 앱 |
-| 데일리싱크 | `@dailysync.app` | 캘린더 + 할 일 + 슬랙 요청 통합 앱 |
-| 루틴랩 | `@routinelab` | 습관 트래커 + 66일 챌린지 |
-| 브레인덱 | `@braindeck` | 플래시카드 학습 앱 (자격증·영어) |
-| 포커스핏 | `@focusfit_official` | 집중 타이머 / 딥워크 앱 |
+| AX아카데미 | `@ax_academy` | 중소기업 팀장 대상 AI 전환 워크샵 |
+| 프롬프트스쿨 | `@promptschool_kr` | 실무 프롬프트 · 업무 자동화 클래스 |
+| 오토메이트랩 | `@automatelab` | 반복 업무 자동화 컨설팅 |
+| 팀AI워크스 | `@teamai_works` | 팀 단위 AI 도입 · 슈퍼유저 육성 |
+| 데이터핏컨설팅 | `@datafit_consulting` | 업무 진단 기반 AX 로드맵 |
+| 실무AI연구소 | `@bizai_lab` | 실무 사례 중심 AI 교육 콘텐츠 |
 
-- 플랫폼: x 12 · threads 12 · youtube 12 · instagram 12 (브랜드마다 플랫폼별 2건, 모자이크가 섞여 보이도록 번갈아 배치)
-- 형식(`formatHint`): card_news 12 (슬라이드 5~7장) · text 10 · short_video 8 · long_video 8 · thread 7 · image 3
-- 훅 유형 8종(question / number / contrarian / story / how_to / announcement / fear / none), CTA 강도 0~4,
-  사회적 증거 약 40%, 긴급성 약 30%, 톤 6종이 골고루 섞이도록 설계했습니다. jev 질문 10개가 전부 갈리는지 확인하는 용도입니다.
+- 플랫폼: x 12 · threads 12 · youtube 12 · instagram 12 (플랫폼이 번갈아 배치되어 모자이크가 섞여 보임)
+- 형식(`formatHint`): card_news 11 (슬라이드 4~7장) · text 14 · short_video 10 · long_video 5 · thread 5 · image 3(광고 소재형)
+- 지표(`metrics`)는 플랫폼별 현실적 범위의 시드 난수, `postedAt` 은 2026-07~09.
 - `thumbnailUrl` 은 넣지 않았습니다 (UI 가 플랫폼 색 텍스트 타일로 렌더).
-
----
+- 다시 만들고 싶으면 LIVE 모드에서 화면의 "카테고리 예시 생성"을 쓰거나, `lib/generateSet.ts` 의 `generateBenchmarkSet()` 을 호출해 이 파일 형식으로 저장하면 됩니다.
 
 ## 1. Post JSON 스키마
 
@@ -130,7 +129,7 @@ curl -N -X POST http://localhost:3000/api/analyze \
   -H 'content-type: application/json' \
   -d '{
     "posts": [ ...Post 배열... ],
-    "brand": { "name": "우리브랜드", "category": "직장인 생산성 앱", "positioning": "알림을 끄고 25분만 집중" },
+    "brand": { "name": "하비탄AI", "category": "AI 전환 컨설팅 · 기업 AI 교육", "positioning": "우리 팀이 직접 만들고 관리하는 AI 전환" },
     "draftCount": 3
   }'
 ```

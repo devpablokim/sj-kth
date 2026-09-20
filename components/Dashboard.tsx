@@ -43,15 +43,15 @@ function parseHealth(v: unknown): Health | null {
 
 /** 비워 두어 placeholder("예: …")가 입력 안내 역할을 하도록 함 — 브랜드명을 채워야 RUN 이 활성화 */
 const DEFAULT_FORM: BrandForm = {
-  name: "",
-  category: "",
-  positioning: "",
+  name: "하비탄AI",
+  category: "AI 전환(AX) 컨설팅 · 기업 AI 교육",
+  positioning: "우리 팀이 직접 만들고 관리할 수 있는 AI 전환 — 업무 진단부터 슈퍼AI워크샵, 공동 개발, 내재화까지",
   draftCount: 3,
 };
 
 /** RunControls 의 "현재 분석 대상" 라벨 */
 const SOURCE_LABEL: Record<PostSource, string> = {
-  sample: "샘플 48건 (생산성 앱 · 데모용)",
+  sample: "샘플 48건 (AI 전환 컨설팅 · 기업 AI 교육 · 데모용)",
   generated: "카테고리 예시 생성 (AI · 실제 게시물 아님)",
   pasted: "직접 붙여넣기",
   youtube: "YouTube 검색",

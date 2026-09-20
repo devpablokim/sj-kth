@@ -1,680 +1,871 @@
 /**
- * 샘플 데이터셋 — "직장인 대상 온라인 클래스 / 생산성 앱" 카테고리의 가상 경쟁 브랜드 6곳이
- * X · Threads · YouTube · Instagram 에 올린 마케팅 포스트 48건입니다 (브랜드별 8건, 플랫폼별 12건).
- * 훅 유형 · CTA 강도 · 사회적 증거 · 긴급성 · 톤 · 형식을 의도적으로 섞어 jev 질문 10개가 모두 갈리도록 설계했습니다.
- * 브랜드·인물·URL 은 전부 허구이며, 실제 수집 데이터 형식은 data/README.md 를 참고하세요.
+ * 샘플 데이터셋 — "AI 전환(AX) 컨설팅 · 기업 AI 교육" 카테고리의 가상 벤치마크 브랜드 6곳이
+ * X · Threads · YouTube · Instagram 에 올린 카드뉴스 · 마케팅 문구 · 광고 소재 48건입니다 (브랜드별 8건, 플랫폼별 12건).
+ * 실제 기업·게시물이 아니며(브랜드명 가상), 텍스트 모델의 도움을 받아 훅 유형 · CTA 강도 · 사회적 증거 · 긴급성 · 톤이
+ * 골고루 섞이도록 만든 데모용 예시입니다. 지표(metrics)는 플랫폼별 현실적 범위의 시드 난수입니다.
+ * 우리 브랜드 예시: 하비탄AI (https://hobbytan.com) — 기본 폼 값은 components/Dashboard.tsx 참고.
  */
 import type { Post } from "@/lib/types";
 
 export const SAMPLE_POSTS: Post[] = [
-  // p001 클래스온 · x · thread — number 훅, CTA 2, 사회적 증거
   {
-    id: "p001",
-    platform: "x",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/x/classon_kr/p001",
-    text: "엑셀 때문에 야근하는 직장인의 80%는 이 3가지 함수를 모릅니다 🧵\n\n1/ XLOOKUP — VLOOKUP 은 이제 그만. 열 순서가 바뀌어도 안 깨집니다.\n\n2/ FILTER — 조건에 맞는 행만 한 번에. 필터 걸고 복붙하던 시간 끝.\n\n3/ LET — 긴 수식에 이름을 붙여서 나중에 봐도 읽힙니다.\n\n4/ 이 세 개만 익혀도 보고서 만드는 시간이 절반으로 줄어요. 누적 수강생 12만 명이 검증한 '엑셀 실무 압축 코스'는 프로필 링크에서 확인하세요.",
-    formatHint: "thread",
-    postedAt: "2026-07-02T09:10:00+09:00",
-    metrics: { likes: 1840, comments: 96, shares: 512 },
-  },
-  // p002 노트플로우 · instagram · card_news — question 훅, CTA 3, 사회적 증거
-  {
-    id: "p002",
-    platform: "instagram",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/instagram/noteflow/p002",
-    text: "회의록 쓰는 시간, 진짜 아깝지 않으세요? 🥲\n노트플로우는 녹음 → 요약 → 담당자 배정까지 자동. 국내 스타트업 300곳이 쓰고 있어요.\n\n댓글에 '회의록' 남기면 2주 무료 체험 링크 DM 드립니다 💌\n\n#회의록 #AI노트 #직장인앱 #생산성",
-    slides: [
-      "회의 끝나고 회의록 쓰느라 30분씩 쓰고 계세요?",
-      "회의는 1시간, 정리는 30분. 하루 3번이면 정리만 1시간 반이에요.",
-      "노트플로우는 회의를 녹음하면 요약·결정사항·담당자를 자동으로 뽑아줍니다.",
-      "'그거 누가 하기로 했지?' → 검색 한 번이면 끝.",
-      "국내 스타트업 300곳이 이미 회의록을 사람 손으로 안 씁니다.",
-      "댓글에 '회의록' 남겨주시면 2주 무료 체험 링크를 DM으로 보내드릴게요 💌",
+    "id": "p001",
+    "platform": "instagram",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/instagram/ax_academy/p001",
+    "text": "대기업만 AI 전환에 성공한다는 편견, 이제 깨질 때입니다. 30인 이하 조직도 6주 안에 반복 업무를 자동화한 사례를 카드뉴스로 정리했어요. #AI전환 #중소기업AI #업무자동화",
+    "slides": [
+      "AI 전환은 대기업만의 이야기다?",
+      "❌ 통념: 억 단위 예산과 전담 팀이 있어야 시작 가능",
+      "✅ 현실: 30인 이하 기업도 3개월 내 업무 자동화 성공 사례 다수",
+      "지난 1년간 중소기업 137개사와 함께한 AX아카데미",
+      "평균 도입 기간 6주, 만족도 4.8/5",
+      "지금 필요한 건 예산이 아니라 방법입니다",
+      "프로필 링크에서 무료 진단 신청하기"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-07-03T18:30:00+09:00",
-    metrics: { likes: 4320, comments: 388, shares: 910 },
+    "formatHint": "card_news",
+    "postedAt": "2026-07-19T16:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 11133,
+      "comments": 446,
+      "shares": 868
+    }
   },
-  // p003 데일리싱크 · youtube · long_video — how_to 훅, CTA 1
   {
-    id: "p003",
-    platform: "youtube",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/youtube/dailysync.app/p003",
-    text: "구글 캘린더 + 노션 + 슬랙을 하나로 합치는 법 (직장인 일정 관리 세팅 20분 완성)\n\n일정은 캘린더에, 할 일은 노션에, 요청은 슬랙에… 세 군데 왔다 갔다 하다가 놓치는 일 없으신가요? 이 영상에서는 데일리싱크로 세 도구를 한 화면에 모으는 세팅을 처음부터 끝까지 따라 해봅니다.\n\n00:00 왜 일정이 자꾸 새는가\n02:10 캘린더 연결\n06:40 노션 할 일 가져오기\n12:05 슬랙 요청을 할 일로 바꾸기\n17:30 하루 뷰 세팅 팁\n\n설명란 링크에서 무료로 시작할 수 있어요.",
-    formatHint: "long_video",
-    postedAt: "2026-07-06T11:00:00+09:00",
-    metrics: { views: 48200, likes: 1130, comments: 84 },
+    "id": "p002",
+    "platform": "threads",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/threads/promptschool_kr/p002",
+    "text": "팀장님, 우리 팀 업무 중에 AI가 대신할 수 있는 게 몇 개나 될까요?\n\n대부분 답을 못 합니다. 진단조차 안 해봤으니까요. AX는 도구 도입이 아니라 업무 재설계에서 시작합니다.",
+    "formatHint": "text",
+    "postedAt": "2026-07-03T14:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1192,
+      "comments": 99,
+      "shares": 7
+    }
   },
-  // p004 루틴랩 · threads · card_news — contrarian 훅, CTA 2
   {
-    id: "p004",
-    platform: "threads",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/threads/routinelab/p004",
-    text: "습관은 의지력으로 만드는 게 아닙니다. 의지력은 배터리라서 저녁이면 방전돼요. 습관을 만드는 건 트리거, 그래서 루틴랩은 '체인' 방식이에요. 66일 체인 챌린지 새 기수 모집 중 — 프로필 링크.",
-    slides: [
-      "습관은 의지력으로 만드는 게 아닙니다.",
-      "의지력은 배터리예요. 저녁이 되면 방전됩니다. 그래서 퇴근 후 운동은 3일을 못 가요.",
-      "습관을 만드는 건 '트리거'입니다. 양치 후 → 스트레칭 1분. 커피 내리는 동안 → 오늘 할 일 3개 적기.",
-      "루틴랩은 기존 습관 뒤에 새 습관을 붙이는 '체인' 방식으로 설계했어요.",
-      "66일 체인 챌린지, 이번 달 새 기수 모집 중. 프로필 링크에서 참여하세요.",
+    "id": "p003",
+    "platform": "x",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/x/ax_academy/p003",
+    "text": "지난 6개월간 AX아카데미 워크샵을 거친 팀장 82%가 '업무 시간 20% 단축'을 경험했습니다. 누적 참여 기업 340곳. 3월 기수 마감까지 D-3, 정원 12석 중 3석 남았습니다. 지금 신청 → 프로필 링크",
+    "formatHint": "text",
+    "postedAt": "2026-09-04T12:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1970,
+      "comments": 125,
+      "shares": 32
+    }
+  },
+  {
+    "id": "p004",
+    "platform": "youtube",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/youtube/ax_academy/p004",
+    "text": "팀장님, AI 툴 배우기 전에 이거 먼저 물어보셨나요? #shorts\n\n요즘 너도나도 챗GPT, 코파일럿 도입한다는데 정작 '우리 팀 업무 프로세스'는 제대로 들여다보셨나요? 툴부터 배우면 반년 뒤에 또 새 툴 찾게 됩니다. AX아카데미의 팀 진단 워크샵은 도구보다 업무 흐름을 먼저 봅니다. 자세한 커리큘럼은 프로필 링크에서 확인해보세요.",
+    "formatHint": "short_video",
+    "postedAt": "2026-08-19T09:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 75996,
+      "likes": 3652,
+      "comments": 98
+    }
+  },
+  {
+    "id": "p005",
+    "platform": "instagram",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/instagram/datafit_consulting/p005",
+    "text": "챗GPT한테 '보고서 써줘'라고만 치고 계신가요?\n\n그 한 줄이 부족해서 매번 다시 쓰고 계셨던 거예요. 프롬프트 하나 바꿨을 뿐인데 결과물이 완전히 달라지는 거 다들 아시죠? 오늘 릴스에서 실무자들이 자주 놓치는 프롬프트 습관 3가지 보여드려요. 저장해두고 다음에 써먹어보세요 :) #프롬프트엔지니어링 #업무자동화",
+    "formatHint": "short_video",
+    "postedAt": "2026-08-02T17:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 10055,
+      "comments": 479,
+      "shares": 159
+    }
+  },
+  {
+    "id": "p006",
+    "platform": "threads",
+    "brand": "실무AI연구소",
+    "handle": "@bizai_lab",
+    "url": "https://example.invalid/threads/bizai_lab/p006",
+    "text": "'프롬프트만 잘 쓰면 AI 잘 쓰는 거다' — 이거 반은 틀렸어요.\n\n진짜 문제는 프롬프트가 아니라 '무엇을 물어봐야 하는지' 모르는 거거든요. 질문 설계 없이는 아무리 좋은 프롬프트도 헛돕니다.\n\n댓글에 '질문설계' 남겨주시면 무료 체크리스트 DM으로 보내드릴게요.",
+    "formatHint": "thread",
+    "postedAt": "2026-07-17T15:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 870,
+      "comments": 115,
+      "shares": 67
+    }
+  },
+  {
+    "id": "p007",
+    "platform": "x",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/x/ax_academy/p007",
+    "text": "1/ 프롬프트 하나로 보고서 초안 뽑는 5단계, 순서대로만 따라 하세요.\n2/ 목적 → 역할 → 맥락 → 형식 → 예시. 이 순서를 지키면 결과물 품질이 확 달라집니다.\n3/ 500개 팀을 교육하며 검증한 순서입니다. 오늘부터 적용해보세요.",
+    "formatHint": "thread",
+    "postedAt": "2026-09-18T13:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1771,
+      "comments": 133,
+      "shares": 117
+    }
+  },
+  {
+    "id": "p008",
+    "platform": "youtube",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/youtube/promptschool_kr/p008",
+    "text": "챗GPT 활용법, 3200명이 배운 프롬프트 설계 노하우\n\n00:00 인트로 - 왜 같은 챗GPT인데 결과물이 다를까\n00:45 실전 사례 - 보고서 작성 프롬프트 3단계 구조\n03:10 흔한 실수 - 지시가 아니라 맥락을 줘야 하는 이유\n05:20 수강생 후기 및 Q&A\n\n지난 1년간 누적 수강생 3,200명이 거쳐간 프롬프트스쿨의 실무 강의 핵심만 담았습니다. 궁금한 점은 댓글로 남겨주시면 다음 영상에서 다뤄볼게요.",
+    "formatHint": "long_video",
+    "postedAt": "2026-09-02T11:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 51174,
+      "likes": 4225,
+      "comments": 260
+    }
+  },
+  {
+    "id": "p009",
+    "platform": "instagram",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/instagram/automatelab/p009",
+    "text": "직장인 대부분이 반복 업무에 하루 2시간 이상을 씁니다. 오토메이트랩 워크샵으로 그 시간을 되찾아보세요. #업무자동화 #노코드AI #워크샵모집",
+    "slides": [
+      "직장인 78%가 반복 업무에 하루 2시간을 씁니다",
+      "엑셀 정리, 보고서 취합, 메일 회신... 매일 반복되는 그 일",
+      "오토메이트랩 워크샵 참가자 평균, 업무 시간 주 6시간 단축",
+      "노코드 자동화 툴 + AI로 직접 만드는 나만의 업무 봇",
+      "이번 기수는 20명 한정, 현재 14명 마감",
+      "얼리버드 할인은 이번 주 금요일 자정까지",
+      "댓글에 '자동화' 남기면 커리큘럼 DM으로 보내드려요"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-07-07T20:15:00+09:00",
-    metrics: { likes: 2140, comments: 143, shares: 380 },
+    "formatHint": "card_news",
+    "postedAt": "2026-09-10T13:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 13290,
+      "comments": 380,
+      "shares": 507
+    }
   },
-  // p005 브레인덱 · x · text — story 훅, CTA 1
   {
-    id: "p005",
-    platform: "x",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/x/braindeck/p005",
-    text: "작년 이맘때 정보처리기사 필기 두 번 떨어졌었어요. 퇴근하고 책 펴면 10분 만에 잠들었거든요.\n\n이번엔 출퇴근 지하철에서 브레인덱 카드만 넘겼습니다. 하루 20분, 8주. 어제 합격 확인했어요.\n\n혹시 저처럼 책상 앞에서 조는 분이면 한번 써보세요. 지하철이 독서실이 됩니다.",
-    formatHint: "text",
-    postedAt: "2026-07-09T08:40:00+09:00",
-    metrics: { likes: 620, comments: 48, shares: 87 },
-  },
-  // p006 포커스핏 · instagram · short_video — fear 훅, CTA 4, 사회적 증거, 긴급성
-  {
-    id: "p006",
-    platform: "instagram",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/instagram/focusfit_official/p006",
-    text: "⚠️ 하루 알림 80개에 집중력 뺏기고 있는 거 알고 계세요?\n\n포커스핏 켜면 25분 동안 알림 전부 차단 + 끝나면 집중 리포트 📊\n직장인 90%가 선택한 집중 타이머, 지금 신청하면 첫 달 무료.\n\n오늘 자정 마감이에요. 댓글에 '타이머' 남기면 딥워크 가이드 DM 드립니다 🔥\n\n#집중력 #포모도로 #딥워크 #직장인루틴",
-    formatHint: "short_video",
-    postedAt: "2026-07-10T12:00:00+09:00",
-    metrics: { views: 182000, likes: 9800, comments: 1240, shares: 2100 },
-  },
-  // p007 클래스온 · threads · text — 훅 없음, CTA 0, playful
-  {
-    id: "p007",
-    platform: "threads",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/threads/classon_kr/p007",
-    text: "금요일 오후 4시. 팀장님이 '이거 피벗 테이블로 정리해서 월요일 아침에 보자' 하고 퇴근하셨다.\n\n피벗… 테이블… 🫠\n\n괜찮아요. 우리 다 그렇게 배웠어요. (그리고 그날 저녁 클래스온 켰죠)",
-    formatHint: "text",
-    postedAt: "2026-07-10T16:05:00+09:00",
-    metrics: { likes: 860, comments: 112, shares: 64 },
-  },
-  // p008 노트플로우 · x · text — announcement 훅, CTA 2, 긴급성(지원 종료), professional
-  {
-    id: "p008",
-    platform: "x",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/x/noteflow/p008",
-    text: "[업데이트] 노트플로우 2.4 배포 안내\n\n- 회의 녹음에서 '결정 사항'과 '액션 아이템'을 분리해 추출합니다.\n- 슬랙 채널로 요약 자동 전송 (워크스페이스 설정 → 연동)\n- 한국어 화자 분리 정확도 개선\n- 10월 15일 이후 2.3 이하 버전은 지원이 종료되니 그 전에 업데이트해 주세요.\n\n자세한 변경 내역은 릴리스 노트에서 확인해 주세요. 링크는 답글에.",
-    formatHint: "text",
-    postedAt: "2026-07-14T10:00:00+09:00",
-    metrics: { likes: 140, comments: 9, shares: 22 },
-  },
-  // p009 데일리싱크 · instagram · card_news — number 훅, CTA 3, 사회적 증거, educational
-  {
-    id: "p009",
-    platform: "instagram",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/instagram/dailysync.app/p009",
-    text: "일 잘하는 사람의 아침 10분 루틴 5가지 ☀️\n\n앱스토어 생산성 1위, 리뷰 4.8점 데일리싱크가 정리했어요. 저장해두고 내일 아침에 바로 해보세요.\n무료 시작은 프로필 링크 🔗\n\n#아침루틴 #할일관리 #직장인 #생산성앱",
-    slides: [
-      "일 잘하는 사람의 아침 10분 루틴 5가지",
-      "① 어제 미룬 일부터 본다 — 새 일을 추가하기 전에 밀린 일부터 정리",
-      "② 오늘 할 일은 딱 3개 — 3개 이상은 '내일' 폴더로",
-      "③ 회의 사이 빈 시간을 먼저 막는다 — 집중 블록을 캘린더에 박아두기",
-      "④ 요청받은 일은 5분 안에 할 일로 바꾼다 — 슬랙 메시지는 잊힙니다",
-      "⑤ 퇴근 전 내일 첫 할 일을 적어둔다 — 아침 시동이 빨라져요",
-      "이 5가지가 앱 하나로 자동화됩니다. 앱스토어 생산성 1위 데일리싱크 — 저장해두고 프로필 링크에서 무료 시작 🔗",
+    "id": "p010",
+    "platform": "threads",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/threads/automatelab/p010",
+    "text": "반복 업무 하루 2시간, 1년이면 500시간\n\n중소기업 87곳 도입 결과로 확인한 자동화 효과, 지금 확인해보세요.",
+    "slides": [
+      "직원 1인당 반복업무 시간, 하루 평균 2.1시간",
+      "1년으로 환산하면 약 500시간 — 3개월치 근무량과 맞먹는 수치",
+      "오토메이트랩 도입 기업 87곳 대상 평균 조사 결과",
+      "자동화 도입 후 반복업무 시간 68% 감소",
+      "남는 시간, 기획과 고객 응대에 재배치",
+      "우리 팀 반복업무, 지금 진단해보세요"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-07-15T07:30:00+09:00",
-    metrics: { likes: 12400, comments: 210, shares: 3900 },
+    "formatHint": "card_news",
+    "postedAt": "2026-08-24T11:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1837,
+      "comments": 66,
+      "shares": 183
+    }
   },
-  // p010 루틴랩 · youtube · long_video — story 훅, CTA 2, 긴급성
   {
-    id: "p010",
-    platform: "youtube",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/youtube/routinelab/p010",
-    text: "66일 동안 매일 아침 5시에 일어났더니 생긴 일 (루틴랩 챌린지 완주 브이로그)\n\n야근 후 새벽 2시 취침이 기본이던 제가 66일 챌린지에 등록했습니다. 처음 2주는 정말 지옥이었고요. 3주차부터 뭔가 달라졌어요.\n\n영상에서는 실제로 실패한 날 7일도 그대로 보여드립니다. 완주가 이런 느낌인지 몰랐어요.\n\n루틴랩은 설명란 링크에서 무료로 시작할 수 있어요. 다음 기수 신청 마감은 이번 주 일요일까지입니다.",
-    formatHint: "long_video",
-    postedAt: "2026-07-17T19:00:00+09:00",
-    metrics: { views: 96500, likes: 3400, comments: 412 },
+    "id": "p011",
+    "platform": "x",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/x/datafit_consulting/p011",
+    "text": "AI 자동화, 대기업 전유물이라고요? 틀렸습니다. 저희 고객사의 68%는 직원 50인 이하 기업입니다. 반복 업무 3개만 자동화해도 월 40시간이 절약됩니다. 이번 주까지 무료 진단 선착순 20팀 접수 중, 프로필 링크에서 신청하세요.",
+    "formatHint": "text",
+    "postedAt": "2026-07-26T09:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1997,
+      "comments": 14,
+      "shares": 184
+    }
   },
-  // p011 브레인덱 · threads · card_news — how_to 훅, CTA 2, educational
   {
-    id: "p011",
-    platform: "threads",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/threads/braindeck/p011",
-    text: "영어 단어 하루 10개씩 안 까먹고 외우는 법 3가지. 핵심은 간격 반복이에요. 브레인덱은 오늘 다시 봐야 할 카드만 골라줍니다. 프로필 링크.",
-    slides: [
-      "영어 단어, 하루 10개씩 안 까먹고 외우는 법",
-      "1. 한 번에 몰아서 외우지 마세요. 20분 뒤, 다음 날, 일주일 뒤 — 간격을 두고 다시 봐야 장기 기억으로 넘어갑니다.",
-      "2. 뜻만 외우지 말고 예문 한 줄과 함께. 문맥이 기억의 고리가 됩니다.",
-      "3. 틀린 카드만 다시 보세요. 아는 카드에 시간 쓰는 게 가장 큰 낭비예요.",
-      "브레인덱은 이 간격 반복을 자동으로 계산해요. 오늘 볼 카드만 알려드립니다 — 프로필 링크에서 시작.",
+    "id": "p012",
+    "platform": "youtube",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/youtube/automatelab/p012",
+    "text": "\"자동화는 개발자만 하는 거다\"는 착각, 오늘로 끝냅니다 #shorts\n\n노코드 자동화 툴 몇 개만 알면 엑셀 반복 작업, 보고서 취합, 알림 발송까지 클릭 몇 번으로 끝낼 수 있습니다. 비개발자 실무자를 위한 오토메이트랩 얼리버드 클래스, 오늘 자정까지만 30% 할인가로 신청 가능합니다. 링크 클릭해서 지금 바로 확인하세요.",
+    "formatHint": "short_video",
+    "postedAt": "2026-08-11T11:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 91673,
+      "likes": 5069,
+      "comments": 308
+    }
+  },
+  {
+    "id": "p013",
+    "platform": "instagram",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/instagram/ax_academy/p013",
+    "text": "업무에 AI를 붙이는 가장 쉬운 순서, 3단계로 정리했습니다.\n\n1) 반복 업무 리스트업 → 2) 자동화 가능 영역 분류 → 3) 팀 단위 파일럿 운영. 많은 기업들이 이 순서를 건너뛰고 툴부터 도입해서 실패합니다. 진단부터 시작하세요. 더 궁금하신 분은 프로필 링크 참고해주세요. #AI전환 #업무자동화 #팀워크샵",
+    "formatHint": "image",
+    "postedAt": "2026-09-11T15:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 10197,
+      "comments": 64,
+      "shares": 484
+    }
+  },
+  {
+    "id": "p014",
+    "platform": "threads",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/threads/promptschool_kr/p014",
+    "text": "작년에 만난 한 팀장님이 그러시더라고요. '우리 팀은 막내가 제일 AI 잘 써요. 근데 그게 문제예요.'\n\n한 명만 잘 쓰면 그 사람 퇴사하는 순간 조직의 AI 역량도 같이 나가버립니다. 워크샵은 그래서 팀 전체가 같이 듣는 걸 원칙으로 해요.",
+    "formatHint": "text",
+    "postedAt": "2026-07-09T17:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1074,
+      "comments": 156,
+      "shares": 146
+    }
+  },
+  {
+    "id": "p015",
+    "platform": "x",
+    "brand": "팀AI워크스",
+    "handle": "@teamai_works",
+    "url": "https://example.invalid/x/teamai_works/p015",
+    "text": "우리 팀도 AI 워크샵이 필요할까요?",
+    "slides": [
+      "매주 반복 보고서 작성에 3시간 이상 쓰나요?",
+      "엑셀 데이터 정리만 하다 하루가 끝나나요?",
+      "챗GPT는 써봤지만 업무엔 적용 못했나요?",
+      "이 중 하나라도 해당된다면, 팀AI워크스 워크샵이 필요한 시점입니다.",
+      "2일 워크샵으로 팀 전용 AI 업무 매뉴얼을 만들어드립니다.",
+      "이번 달 한정 3팀만 선착순 무료 진단 가능합니다."
     ],
-    formatHint: "card_news",
-    postedAt: "2026-07-20T21:10:00+09:00",
-    metrics: { likes: 1320, comments: 58, shares: 240 },
+    "formatHint": "card_news",
+    "postedAt": "2026-07-12T18:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 2196,
+      "comments": 5,
+      "shares": 100
+    }
   },
-  // p012 포커스핏 · x · thread — contrarian 훅, CTA 3, bold
   {
-    id: "p012",
-    platform: "x",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/x/focusfit_official/p012",
-    text: "멀티태스킹 잘하는 사람은 없습니다. 빨리 전환하는 사람만 있을 뿐이고, 전환할 때마다 23분씩 잃습니다. 🧵\n\n1/ 슬랙 보고, 메일 보고, 다시 문서로. 하루에 이 전환을 40번 하면 집중 시간은 사실상 0에 수렴해요.\n\n2/ 해결책은 '더 열심히'가 아니라 '전환 자체를 막기'입니다.\n\n3/ 포커스핏은 25분 블록 동안 알림·탭·앱을 물리적으로 잠급니다. 의지력 필요 없어요.\n\n4/ 이 스레드를 리포스트하고 답글에 '블록' 남기면 딥워크 세팅 가이드(PDF)를 DM으로 보내드립니다.",
-    formatHint: "thread",
-    postedAt: "2026-07-22T09:00:00+09:00",
-    metrics: { likes: 2760, comments: 214, shares: 890 },
+    "id": "p016",
+    "platform": "youtube",
+    "brand": "팀AI워크스",
+    "handle": "@teamai_works",
+    "url": "https://example.invalid/youtube/teamai_works/p016",
+    "text": "87개 기업이 AI 내재화에 실패하지 않은 이유\n\n00:00 도입부 - 대부분의 AI 도입이 흐지부지되는 패턴\n01:30 사례 하나 - 초반엔 열정적이었지만 3개월 만에 멈춘 팀\n04:00 전환점 - 담당자를 남기지 않고 '팀 전체'가 쓰게 만든 방식\n07:15 정리\n\n팀AI워크스와 함께한 87개 기업의 공통점은 하나였습니다. 특정 담당자가 아니라 팀 전체가 도구를 쓸 수 있게 만드는 것. 오늘 영상에서 그 과정을 자세히 풀어봅니다.",
+    "formatHint": "long_video",
+    "postedAt": "2026-07-29T10:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 116494,
+      "likes": 4495,
+      "comments": 146
+    }
   },
-  // p013 클래스온 · youtube · long_video — fear 훅, CTA 2, 사회적 증거, 긴급성, professional
   {
-    id: "p013",
-    platform: "youtube",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/youtube/classon_kr/p013",
-    text: "PPT 이렇게 만들면 상사가 안 읽습니다 — 보고서 슬라이드 5가지 실수와 수정 전후\n\n열심히 만든 30장짜리 보고서, 회의에서 3장만 넘기고 끝난 경험 있으신가요? 문제는 내용이 아니라 구조입니다.\n\n이 영상에서는 수강생 제출물(동의 받은 것)을 수정 전후로 비교하며 5가지 실수를 짚습니다.\n1) 제목이 결론이 아님 2) 한 슬라이드에 메시지 3개 3) 표를 그대로 캡처 4) 근거 없는 형용사 5) 마지막 장에 '감사합니다'\n\n누적 수강생 12만 명, 평균 별점 4.9의 '보고서 PPT 실무 클래스'는 설명란 링크에서. 이번 주 안에 등록하면 20% 얼리버드가 적용됩니다.",
-    formatHint: "long_video",
-    postedAt: "2026-07-24T18:00:00+09:00",
-    metrics: { views: 213000, likes: 6100, comments: 530 },
-  },
-  // p014 노트플로우 · threads · text — question 훅, CTA 1, friendly
-  {
-    id: "p014",
-    platform: "threads",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/threads/noteflow/p014",
-    text: "회의 중에 노트 치느라 정작 대화에 못 끼는 분 계세요? 🙋‍♀️\n\n저 그랬거든요. 그래서 요즘은 노트플로우 켜두고 그냥 회의에 집중해요. 끝나면 요약이 와 있어요.\n\n'그거 누가 하기로 했지' 검색하면 나오는 게 제일 좋아요. 궁금하면 한번 써보세요.",
-    formatHint: "text",
-    postedAt: "2026-07-27T13:20:00+09:00",
-    metrics: { likes: 540, comments: 47, shares: 38 },
-  },
-  // p015 데일리싱크 · x · text — announcement 훅, CTA 4, 사회적 증거, 긴급성, professional
-  {
-    id: "p015",
-    platform: "x",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/x/dailysync.app/p015",
-    text: "데일리싱크 팀 플랜 출시 기념, 9월 30일까지 연간 결제 40% 할인.\n\n- 팀 캘린더·할 일·회의 요청을 한 화면에\n- 슬랙/구글 워크스페이스 연동\n- 앱스토어 생산성 1위, 리뷰 4.8점\n\n50개 팀 한정이며 오늘 기준 17팀 남았습니다. 링크에서 바로 신청하세요.",
-    formatHint: "text",
-    postedAt: "2026-07-29T10:30:00+09:00",
-    metrics: { likes: 310, comments: 24, shares: 71 },
-  },
-  // p016 루틴랩 · instagram · short_video — story 훅, CTA 1, playful
-  {
-    id: "p016",
-    platform: "instagram",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/instagram/routinelab/p016",
-    text: "매일 밤 '내일부터 진짜 한다' 하고 3년 지난 사람 (=나) 🙃\n\n루틴랩 체인 켜고 나서 바뀐 거: 양치 → 스트레칭 1분 → 물 한 잔. 별거 아닌데 47일째 안 끊김.\n\n체인 안 끊기는 게 이렇게 중독될 줄 몰랐어요. 궁금하면 앱 한번 봐보세요 ㅎㅎ\n\n#습관만들기 #루틴 #갓생 #직장인브이로그",
-    formatHint: "short_video",
-    postedAt: "2026-07-31T22:00:00+09:00",
-    metrics: { views: 64000, likes: 3100, comments: 190, shares: 420 },
-  },
-  // p017 브레인덱 · youtube · short_video — number 훅, CTA 3, 사회적 증거, 긴급성
-  {
-    id: "p017",
-    platform: "youtube",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/youtube/braindeck/p017",
-    text: "#shorts 하루 20분으로 토익 200점 올린 카드 루틴 3단계\n\n1. 출근길: 새 카드 10장 2. 점심: 어제 틀린 카드 3. 퇴근길: 일주일 전 카드 복습\n\n합격·점수 상승 후기 2,000건이 이 루틴이에요. 이번 주까지 댓글에 '루틴' 남기면 토익 필수 900단어 덱을 무료로 드립니다.",
-    formatHint: "short_video",
-    postedAt: "2026-08-03T08:00:00+09:00",
-    metrics: { views: 152000, likes: 5900, comments: 870 },
-  },
-  // p018 포커스핏 · threads · card_news — question 훅, CTA 2, 사회적 증거(데이터), educational
-  {
-    id: "p018",
-    platform: "threads",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/threads/focusfit_official/p018",
-    text: "오후 3시만 되면 집중이 안 되는 이유. 사용자 데이터로 보니 오전 25분 블록 3개를 지킨 사람은 오후 집중 시간이 평균 2.4시간 더 길었어요. 방법 2가지 카드에 정리 — 무료 시작은 프로필 링크.",
-    slides: [
-      "오후 3시만 되면 집중이 안 되는 이유, 알고 계세요?",
-      "점심 후 혈당 변화도 있지만, 진짜 원인은 오전에 이미 '전환'을 너무 많이 한 것. 뇌가 지쳐 있어요.",
-      "포커스핏 사용자 데이터: 오전에 25분 블록 3개를 지킨 사람은 오후 집중 시간이 평균 2.4시간 더 길었습니다.",
-      "방법 1. 오전 첫 2시간에 알림 전부 끄기",
-      "방법 2. 오후 3시엔 '가벼운 일'만 배치하기 — 메일 정리, 일정 확인",
-      "직장인 90%가 선택한 집중 타이머 포커스핏, 프로필 링크에서 무료로 시작하세요.",
+    "id": "p017",
+    "platform": "instagram",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/instagram/datafit_consulting/p017",
+    "text": "AI 도입, 늦출수록 손해입니다. 데이터핏이 우리 회사 데이터부터 진단해드립니다. #AI전환컨설팅 #데이터진단",
+    "slides": [
+      "지금 AI 안 쓰면, 내년엔 경쟁사한테 밀립니다",
+      "이미 동종업계 42%가 AI 업무 도구 도입 완료",
+      "안 쓰는 팀은 매달 인건비로 더 지불하고 있는 셈",
+      "데이터핏은 우리 회사 데이터 구조부터 진단합니다",
+      "잘못된 도구 도입, 되돌리는 비용이 더 큽니다",
+      "지금 시작해야 늦지 않습니다",
+      "오늘 자정까지 무료 컨설팅 신청 마감, 링크 클릭하세요"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-08-04T15:00:00+09:00",
-    metrics: { likes: 1980, comments: 88, shares: 350 },
+    "formatHint": "card_news",
+    "postedAt": "2026-08-28T13:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 11275,
+      "comments": 31,
+      "shares": 304
+    }
   },
-  // p019 클래스온 · instagram · card_news — announcement 훅, CTA 4, 사회적 증거, 긴급성, luxury
   {
-    id: "p019",
-    platform: "instagram",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/instagram/classon_kr/p019",
-    text: "클래스온 프리미엄 멤버십, 9월 한정 오픈.\n실무 클래스 240개 무제한 · 현직 강사진 58명 · 별점 4.9\n첫 300명 연간 30% 우대, 9월 30일 자정 마감.\n프로필 링크에서 신청하세요.\n\n#클래스온 #온라인클래스 #직장인자기계발",
-    slides: [
-      "클래스온 프리미엄 멤버십 — 9월 한정 오픈",
-      "실무 클래스 240개, 무제한. 엑셀·PPT·데이터·AI 업무 활용까지 한 멤버십으로.",
-      "현직 실무자 강사진 58명. 평균 별점 4.9.",
-      "첫 300명에게만 연간 멤버십 30% 우대. 이후에는 정가로 돌아갑니다.",
-      "9월 30일 자정 마감. 프로필 링크에서 지금 신청하세요.",
+    "id": "p018",
+    "platform": "threads",
+    "brand": "실무AI연구소",
+    "handle": "@bizai_lab",
+    "url": "https://example.invalid/threads/bizai_lab/p018",
+    "text": "AI 전환, 이 순서대로 하면 실패 안 합니다\n\n중소기업 컨설팅에서 반복적으로 확인한 5단계 프로세스입니다.",
+    "slides": [
+      "1단계: 업무 프로세스 전수 조사",
+      "2단계: 자동화 가능 영역 우선순위화",
+      "3단계: 소규모 파일럿 2주 운영",
+      "4단계: 결과 측정 후 확산 여부 결정",
+      "5단계: 내부 담당자 육성 및 매뉴얼화"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-08-06T10:00:00+09:00",
-    metrics: { likes: 2600, comments: 74, shares: 310 },
+    "formatHint": "card_news",
+    "postedAt": "2026-09-13T16:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1396,
+      "comments": 139,
+      "shares": 85
+    }
   },
-  // p020 노트플로우 · youtube · long_video — how_to 훅, CTA 1, educational
   {
-    id: "p020",
-    platform: "youtube",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/youtube/noteflow/p020",
-    text: "AI 회의록 제대로 쓰는 법 — 요약이 엉망으로 나오는 이유와 프롬프트 없이 고치는 3가지 세팅\n\nAI 회의록 써봤는데 '누가 뭘 하기로 했는지'가 빠져서 결국 다시 정리하신 분들 위한 영상입니다.\n\n대부분 문제는 AI가 아니라 입력 세팅에 있어요. 회의 시작 전 아젠다 3줄, 참석자 이름 등록, 회의 유형 선택 — 이 세 가지만 바꿔도 결과가 완전히 달라집니다. 노트플로우 기준으로 시연하지만 다른 툴에도 그대로 적용됩니다.\n\n00:00 왜 요약이 엉망인가\n03:20 아젠다 세팅\n08:45 화자 등록\n13:10 회의 유형별 템플릿\n\n노트플로우는 설명란에서 무료로 써볼 수 있어요.",
-    formatHint: "long_video",
-    postedAt: "2026-08-07T17:30:00+09:00",
-    metrics: { views: 27800, likes: 890, comments: 61 },
+    "id": "p019",
+    "platform": "x",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/x/ax_academy/p019",
+    "text": "작년 이맘때, 한 제조업 팀장님은 '우리 회사엔 AI가 안 맞는다'고 하셨습니다. 6개월 뒤, 그 팀은 발주서 처리 시간을 절반으로 줄였고, 현재 120개 팀이 같은 방식으로 도입했습니다. 데이터 정리부터 시작했을 뿐입니다. 궁금하신 분은 댓글 남겨주세요.",
+    "formatHint": "text",
+    "postedAt": "2026-09-16T16:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 2395,
+      "comments": 133,
+      "shares": 15
+    }
   },
-  // p021 데일리싱크 · threads · text — contrarian 훅, CTA 0, bold
   {
-    id: "p021",
-    platform: "threads",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/threads/dailysync.app/p021",
-    text: "할 일 앱을 바꾼다고 생산성이 오르지 않습니다. 진짜 문제는 할 일이 캘린더에 없다는 거예요.\n\n'언젠가 할 일' 목록은 그냥 죄책감 저장소입니다. 시간을 잡지 않은 할 일은 안 한 일이에요.\n\n앱은 거들 뿐. (네, 저희 앱도요.)",
-    formatHint: "text",
-    postedAt: "2026-08-10T21:45:00+09:00",
-    metrics: { likes: 3400, comments: 260, shares: 720 },
+    "id": "p020",
+    "platform": "youtube",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/youtube/promptschool_kr/p020",
+    "text": "AI 업무 진단, 이 3단계만 따라하면 됩니다 #shorts\n\n1단계, 반복 업무 목록화. 2단계, 소요 시간 측정. 3단계, AI로 대체 가능한 항목 표시. 이 3단계만 해도 어디서부터 시작할지 감이 잡힙니다. 전체 진단 템플릿은 설명란 링크에서 무료로 받아보실 수 있습니다.",
+    "formatHint": "short_video",
+    "postedAt": "2026-07-15T18:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 141316,
+      "likes": 3922,
+      "comments": 779
+    }
   },
-  // p022 루틴랩 · x · thread — number 훅, CTA 2, 사회적 증거(데이터), educational
   {
-    id: "p022",
-    platform: "x",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/x/routinelab/p022",
-    text: "챌린지 참여자 4만 명 데이터로 본 '습관 실패 지점' 3곳 🧵\n\n1/ 3일차 — 신기함이 사라지는 날. 여기서 34%가 이탈합니다.\n\n2/ 12일차 — 첫 '어쩔 수 없이 빠지는 날'(회식, 야근). 한 번 끊기면 47%가 안 돌아옵니다.\n\n3/ 30일차 — 성과가 눈에 안 보이는 구간. 결과가 아니라 '체인 길이'를 보는 사람만 남습니다.\n\n4/ 그래서 루틴랩은 하루 빠져도 체인이 끊기지 않는 '프리즈' 1회를 줍니다. 완주율 71%의 비밀이에요. 프로필 링크에서 확인.",
-    formatHint: "thread",
-    postedAt: "2026-08-11T09:20:00+09:00",
-    metrics: { likes: 1120, comments: 67, shares: 340 },
+    "id": "p021",
+    "platform": "instagram",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/instagram/automatelab/p021",
+    "text": "3년차 팀장님이 보내주신 후기\n\n'매주 월요일마다 주간보고 작성에 2시간씩 쓰던 저희 팀, 이제는 15분이면 끝나요.' 처음엔 반신반의하셨다는 팀장님, 워크샵 끝나고 직접 템플릿까지 만드셔서 팀원들과 공유하셨대요. 저희도 이런 후기 받을 때마다 뿌듯합니다. 궁금하신 분들은 댓글 남겨주세요, 순서대로 안내드릴게요. #AI워크샵후기 #실무AI",
+    "formatHint": "short_video",
+    "postedAt": "2026-08-25T14:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1633,
+      "comments": 386,
+      "shares": 238
+    }
   },
-  // p023 브레인덱 · instagram · image — 훅 없음, CTA 1, luxury
   {
-    id: "p023",
-    platform: "instagram",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/instagram/braindeck/p023",
-    text: "어젯밤 11시, 사무실 불은 꺼졌고 카드는 아직 32장 남았습니다.\n\n지하철 한 정거장에 카드 한 장. 그렇게 쌓인 밤들이 결국 자격증이 됩니다.\n\n브레인덱과 함께하는 조용한 성장.\n\n#브레인덱 #자격증공부 #직장인공부",
-    formatHint: "image",
-    postedAt: "2026-08-12T23:05:00+09:00",
-    metrics: { likes: 780, comments: 21, shares: 44 },
+    "id": "p022",
+    "platform": "threads",
+    "brand": "팀AI워크스",
+    "handle": "@teamai_works",
+    "url": "https://example.invalid/threads/teamai_works/p022",
+    "text": "11월 슈퍼유저 워크샵, 선착순 20팀 모집 마감 임박\n\n남은 자리 3팀. 오늘 자정까지 신청하시면 얼리버드가 적용됩니다. 프로필 링크에서 바로 신청하세요.",
+    "formatHint": "text",
+    "postedAt": "2026-08-08T12:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 2493,
+      "comments": 69,
+      "shares": 93
+    }
   },
-  // p024 포커스핏 · youtube · short_video — fear 훅, CTA 1, playful
   {
-    id: "p024",
-    platform: "youtube",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/youtube/focusfit_official/p024",
-    text: "#shorts 집중하려고 앉았는데 30초 만에 폰 든 사람 손 🙋 (알림 80개의 습격)\n\n포커스핏 켜면 25분간 폰이 벽돌이 됩니다. 진짜로요. 링크는 설명란에.",
-    formatHint: "short_video",
-    postedAt: "2026-08-14T12:30:00+09:00",
-    metrics: { views: 88000, likes: 4200, comments: 310 },
+    "id": "p023",
+    "platform": "x",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/x/datafit_consulting/p023",
+    "text": "기업 AI 도입 실패 원인 1위는 기술이 아니라 '내재화 부족'입니다. 외부 컨설팅으로 끝나면 6개월 뒤 원점으로 돌아갑니다. 실무자가 직접 운영할 수 있어야 지속됩니다.",
+    "formatHint": "text",
+    "postedAt": "2026-07-23T10:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 215,
+      "comments": 109,
+      "shares": 153
+    }
   },
-  // p025 클래스온 · x · text — question 훅, CTA 3, 사회적 증거, 긴급성, friendly
   {
-    id: "p025",
-    platform: "x",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/x/classon_kr/p025",
-    text: "매달 첫 주에 '이번 달엔 뭔가 배워야지' 하고 검색만 하다가 끝나는 분?\n\n그래서 만들었어요. 하루 15분짜리 실무 클래스 '월간 클래스온'. 이번 달 주제는 '노션으로 팀 위키 만들기'.\n\n수강생 12만 명이 남긴 별점 4.9. 이번 주 금요일까지 답글에 '위키' 남기면 첫 강의 무료 링크 DM으로 보내드릴게요.",
-    formatHint: "text",
-    postedAt: "2026-08-17T09:00:00+09:00",
-    metrics: { likes: 430, comments: 71, shares: 58 },
+    "id": "p024",
+    "platform": "youtube",
+    "brand": "실무AI연구소",
+    "handle": "@bizai_lab",
+    "url": "https://example.invalid/youtube/bizai_lab/p024",
+    "text": "[공지] 슈퍼유저 워크샵 8기 모집, 선착순 30명 마감 임박 #shorts\n\n지금까지 누적 수료생 5,000명을 배출한 실무AI연구소 슈퍼유저 워크샵, 이번 8기는 선착순 30명만 받습니다. 팀 내 AI 전파자를 키우고 싶으신 팀장님이라면 지금 바로 신청하세요. 마감되면 다음 기수는 두 달 뒤에나 열립니다.",
+    "formatHint": "short_video",
+    "postedAt": "2026-07-06T18:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 176126,
+      "likes": 2611,
+      "comments": 330
+    }
   },
-  // p026 노트플로우 · instagram · card_news — fear 훅, CTA 3, 사회적 증거, professional
   {
-    id: "p026",
-    platform: "instagram",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/instagram/noteflow/p026",
-    text: "회의록 없이 진행한 프로젝트가 나중에 어떻게 되는지, 6장에 정리했습니다.\n국내 스타트업 300곳이 선택한 노트플로우 — 댓글에 '도입' 남기시면 팀 도입 가이드와 2주 체험 링크를 DM으로 드립니다.\n\n#회의록 #프로젝트관리 #스타트업 #노트플로우",
-    slides: [
-      "회의록 없이 진행한 프로젝트, 나중에 이렇게 됩니다",
-      "'그때 분명히 A안으로 가기로 했잖아요' — 기억은 사람마다 다릅니다.",
-      "책임이 불분명한 액션 아이템은 평균 2.3주가 지나서야 누군가 챙깁니다. (노트플로우 고객사 설문)",
-      "노트플로우는 회의가 끝나는 순간 결정 사항·담당자·기한을 자동으로 문서화합니다.",
-      "국내 스타트업 300곳이 '누가 뭘 하기로 했는지'를 더 이상 기억에 맡기지 않습니다.",
-      "댓글에 '도입' 남기시면 팀 도입 가이드와 2주 체험 링크를 DM으로 보내드립니다.",
+    "id": "p025",
+    "platform": "instagram",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/instagram/ax_academy/p025",
+    "text": "9월 슈퍼유저 워크샵 얼리버드 마감 D-2\n\n팀장급 대상 3주 완성 AI 전환 워크샵, 이번 기수부터 가격이 오릅니다. 지금 신청하시면 20% 할인가로 참여 가능해요. 자리는 8석 남았습니다. 마감 후 문의는 정가로만 안내드립니다. 서두르세요. #AI워크샵 #얼리버드마감",
+    "formatHint": "image",
+    "postedAt": "2026-09-07T15:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 555,
+      "comments": 419,
+      "shares": 419
+    }
+  },
+  {
+    "id": "p026",
+    "platform": "threads",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/threads/promptschool_kr/p026",
+    "text": "경쟁사는 이미 AI로 견적서 작성 시간을 10분으로 줄였는데, 우리는 아직도 2시간 걸린다면요.\n\n올해 안에 안 바뀌면 내년엔 인력으로 못 따라잡습니다. AX는 선택이 아니라 생존 문제로 다가오고 있어요.",
+    "formatHint": "thread",
+    "postedAt": "2026-08-22T13:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 2170,
+      "comments": 86,
+      "shares": 154
+    }
+  },
+  {
+    "id": "p027",
+    "platform": "x",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/x/ax_academy/p027",
+    "text": "AX아카데미 4월 슈퍼유저 과정, 얼리버드 30% 할인 오늘 자정 마감입니다. 30명 정원 중 5석 남았습니다. 놓치면 다음 기수는 7월입니다. 지금 등록 → 프로필 링크",
+    "formatHint": "text",
+    "postedAt": "2026-08-05T11:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 2575,
+      "comments": 117,
+      "shares": 238
+    }
+  },
+  {
+    "id": "p028",
+    "platform": "youtube",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/youtube/ax_academy/p028",
+    "text": "AI 도입 늦추면 팀이 겪게 될 3가지 손실\n\n00:00 인트로\n01:20 손실 1 - 경쟁사 대비 벌어지는 생산성 격차\n03:40 손실 2 - 신입은 AI로 배우고 기존 직원은 그대로인 역량 단절\n06:00 손실 3 - 나중에 몰아서 도입할 때 드는 두 배의 비용과 시간\n08:10 마무리\n\n이번 분기 AX아카데미 팀장 대상 무료 진단 상담은 이틀 뒤 마감됩니다. 늦기 전에 설명란 링크로 신청해보세요.",
+    "formatHint": "long_video",
+    "postedAt": "2026-07-20T09:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 151304,
+      "likes": 3184,
+      "comments": 491
+    }
+  },
+  {
+    "id": "p029",
+    "platform": "instagram",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/instagram/datafit_consulting/p029",
+    "text": "실무에서 바로 쓰는 보고서 프롬프트, 카드뉴스로 정리했습니다. #프롬프트엔지니어링 #보고서작성 #AI실무",
+    "slides": [
+      "보고서 초안, AI로 10분 만에 뽑는 법",
+      "1. 목적과 대상 독자를 먼저 명시하기",
+      "2. 원하는 톤과 분량을 구체적으로 지정하기",
+      "3. 예시 문장 하나를 넣어 스타일 학습시키기",
+      "누적 수강생 2,400명이 검증한 프롬프트 템플릿",
+      "실무자 평점 4.7/5, 재수강률 32%",
+      "전체 템플릿은 프로필 링크에서 무료로 받아보세요"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-08-18T11:40:00+09:00",
-    metrics: { likes: 1650, comments: 132, shares: 480 },
+    "formatHint": "card_news",
+    "postedAt": "2026-07-03T17:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 13327,
+      "comments": 452,
+      "shares": 600
+    }
   },
-  // p027 데일리싱크 · youtube · long_video — contrarian 훅, CTA 2, bold
   {
-    id: "p027",
-    platform: "youtube",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/youtube/dailysync.app/p027",
-    text: "투두리스트 쓰지 마세요 — 10년 차 PM이 할 일 앱을 버리고 캘린더만 쓰는 이유\n\n투두리스트는 '할 일'을 모으기엔 좋지만 '언제 할지'를 말해주지 않습니다. 그래서 목록은 길어지고 죄책감만 쌓여요.\n\n이 영상에서는 할 일을 전부 캘린더 블록으로 바꾸는 '타임박싱' 방식과, 데일리싱크에서 이걸 드래그 한 번으로 하는 법을 보여드립니다. 반박 댓글 환영합니다. 진짜로요.\n\n체험은 설명란 링크. 첫 2주는 무료입니다.",
-    formatHint: "long_video",
-    postedAt: "2026-08-20T19:00:00+09:00",
-    metrics: { views: 134000, likes: 4800, comments: 690 },
+    "id": "p030",
+    "platform": "threads",
+    "brand": "실무AI연구소",
+    "handle": "@bizai_lab",
+    "url": "https://example.invalid/threads/bizai_lab/p030",
+    "text": "좋은 워크샵은 화려한 데모가 아니라 끝나고 남는 습관을 만듭니다. 저희는 3개월 뒤 다시 찾아가 실제로 업무에 적용됐는지 확인합니다.",
+    "formatHint": "text",
+    "postedAt": "2026-09-05T15:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1848,
+      "comments": 102,
+      "shares": 215
+    }
   },
-  // p028 루틴랩 · threads · card_news — announcement 훅, CTA 3, 사회적 증거, 긴급성, friendly
   {
-    id: "p028",
-    platform: "threads",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/threads/routinelab/p028",
-    text: "10월 66일 챌린지 오픈 🎉 테마는 '퇴근 후 1시간'. 지난 기수 완주율 71%, 완주하면 참가비 전액 환급. 정원 2,000명 — 댓글에 '참여' 남기면 등록 링크 DM 드려요.",
-    slides: [
-      "10월 66일 챌린지, 오늘 오픈했어요 🎉",
-      "이번 기수 테마: 퇴근 후 1시간 — 운동·독서·사이드 프로젝트 중 하나 골라요.",
-      "지난 기수 완주율 71%. 완주하면 참가비 전액 환급 + 완주 배지.",
-      "정원 2,000명, 마감되면 다음 기수는 11월이에요.",
-      "댓글에 '참여' 남기면 등록 링크 DM 드릴게요 💌",
+    "id": "p031",
+    "platform": "x",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/x/ax_academy/p031",
+    "text": "동료가 프롬프트 하나로 3시간 걸릴 일을 20분 만에 끝내는 동안, 아직도 검색창에 키워드만 입력하고 계신가요? 6개월 뒤 격차는 되돌릴 수 없습니다.",
+    "formatHint": "text",
+    "postedAt": "2026-09-14T17:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 899,
+      "comments": 135,
+      "shares": 93
+    }
+  },
+  {
+    "id": "p032",
+    "platform": "youtube",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/youtube/promptschool_kr/p032",
+    "text": "프롬프트 한 줄의 차이 #shorts\n\n같은 질문이라도 어떻게 묻느냐에 따라 결과물의 품질이 완전히 달라집니다. 프롬프트스쿨은 그 한 줄을 다루는 법을 가르칩니다. 관심 있으시면 설명란을 확인해보세요.",
+    "formatHint": "short_video",
+    "postedAt": "2026-07-13T09:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 273752,
+      "likes": 4021,
+      "comments": 133
+    }
+  },
+  {
+    "id": "p033",
+    "platform": "instagram",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/instagram/automatelab/p033",
+    "text": "요즘 저희가 진행하는 워크샵은 이렇게 구성됩니다.\n\n1일차는 업무 프로세스 매핑, 2일차는 자동화 툴 실습, 3일차는 팀별 파일럿 발표로 마무리됩니다. 이론보다는 직접 만들어보는 시간이 훨씬 많아요. 참고 자료는 워크샵 종료 후 전원에게 공유됩니다. #AX워크샵 #업무자동화",
+    "formatHint": "short_video",
+    "postedAt": "2026-07-30T11:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 5335,
+      "comments": 483,
+      "shares": 108
+    }
+  },
+  {
+    "id": "p034",
+    "platform": "threads",
+    "brand": "팀AI워크스",
+    "handle": "@teamai_works",
+    "url": "https://example.invalid/threads/teamai_works/p034",
+    "text": "오늘 회의록 정리하는 데 얼마나 걸리셨어요?\n\n저희 수강생 320명 중 70%가 워크샵 2주 만에 회의록 자동 요약을 업무에 적용했다고 답했어요. 어렵지 않아요, 방법을 몰랐을 뿐이에요.",
+    "formatHint": "text",
+    "postedAt": "2026-08-15T13:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 3761,
+      "comments": 110,
+      "shares": 20
+    }
+  },
+  {
+    "id": "p035",
+    "platform": "x",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/x/datafit_consulting/p035",
+    "text": "1/ 국내 중소기업 240곳 데이터로 확인한 자동화 효과.\n2/ 반복 업무 자동화 도입 기업의 평균 업무 처리 시간 -35%.\n3/ 도입 3개월 내 ROI 회수 기업 비율 61%.\n4/ 숫자는 거짓말하지 않습니다. 우리 팀도 가능할지 확인해보세요.",
+    "formatHint": "thread",
+    "postedAt": "2026-07-10T18:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 699,
+      "comments": 6,
+      "shares": 177
+    }
+  },
+  {
+    "id": "p036",
+    "platform": "youtube",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/youtube/automatelab/p036",
+    "text": "업무 자동화 도입 기업, 평균 업무시간 32% 단축했습니다\n\n00:00 배경 설명\n02:00 도입 전후 비교 데이터\n05:30 자동화 적용 업무 유형 TOP 5\n08:00 정리\n\n오토메이트랩과 함께 자동화를 도입한 120여 개 기업의 데이터를 분석한 결과, 평균적으로 반복 업무 시간이 32% 줄어든 것으로 나타났습니다. 자세한 데이터는 영상에서 확인하세요.",
+    "formatHint": "long_video",
+    "postedAt": "2026-07-27T10:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 248930,
+      "likes": 4595,
+      "comments": 294
+    }
+  },
+  {
+    "id": "p037",
+    "platform": "instagram",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/instagram/ax_academy/p037",
+    "text": "우리 팀 AI 도입 준비, 체크리스트로 확인해보세요. #AI도입체크리스트 #팀워크샵",
+    "slides": [
+      "우리 팀, AI 도입할 준비 되어있을까요?",
+      "체크리스트 1: 반복 업무가 문서화되어 있나요?",
+      "체크리스트 2: 데이터가 한 곳에 정리되어 있나요?",
+      "체크리스트 3: 실무자가 직접 툴을 다룰 수 있나요?",
+      "지금까지 96개 기업이 이 체크리스트로 시작했습니다",
+      "3개 이상 '아니오'라면 진단부터 필요해요",
+      "댓글에 '진단' 남겨주시면 체크리스트 전체본 DM 드립니다"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-08-21T10:00:00+09:00",
-    metrics: { likes: 2900, comments: 610, shares: 410 },
+    "formatHint": "card_news",
+    "postedAt": "2026-08-12T13:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 4257,
+      "comments": 516,
+      "shares": 289
+    }
   },
-  // p029 브레인덱 · x · text — how_to 훅, CTA 2, educational
   {
-    id: "p029",
-    platform: "x",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/x/braindeck/p029",
-    text: "암기 효율을 2배로 올리는 가장 쉬운 방법: '읽기'를 '떠올리기'로 바꾸세요.\n\n책을 다시 읽으면 아는 것 같은 착각이 생깁니다. 대신 책을 덮고 방금 본 내용을 떠올려 보세요. 틀린 부분만 다시 봅니다.\n\n브레인덱은 이 '떠올리기'를 카드 앞뒤로 강제합니다. 프로필 링크에서 무료 덱 받아보세요.",
-    formatHint: "text",
-    postedAt: "2026-08-24T08:15:00+09:00",
-    metrics: { likes: 890, comments: 34, shares: 210 },
-  },
-  // p030 포커스핏 · instagram · short_video — number 훅, CTA 2, 사회적 증거, friendly
-  {
-    id: "p030",
-    platform: "instagram",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/instagram/focusfit_official/p030",
-    text: "직장인 1,000명한테 물어봤어요. 하루에 '진짜 집중'하는 시간은?\n\n평균 1시간 12분 😳 (8시간 근무 기준)\n\n포커스핏 쓰고 4주 뒤엔 평균 2.4시간 늘었대요. 비결은 25분 블록 + 알림 차단. 프로필 링크에서 무료로 시작해보세요 ⏱️\n\n#집중 #직장인 #딥워크 #생산성",
-    formatHint: "short_video",
-    postedAt: "2026-08-25T12:00:00+09:00",
-    metrics: { views: 240000, likes: 15600, comments: 640, shares: 3200 },
-  },
-  // p031 클래스온 · threads · thread — story 훅, CTA 1, friendly
-  {
-    id: "p031",
-    platform: "threads",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/threads/classon_kr/p031",
-    text: "1/ 3년 차 마케터인데 데이터 분석 못 한다고 회의에서 한 소리 들은 날 이야기.\n\n2/ 집에 와서 '데이터 분석 배우기' 검색했더니 파이썬부터 하라는 글이 잔뜩. 그날은 그냥 잤어요.\n\n3/ 다음 날 동료가 '엑셀로 먼저 해봐'라며 클래스온 링크를 줬어요. 피벗 → 차트 → 간단한 회귀. 3주 걸렸어요.\n\n4/ 지난주엔 제가 그 회의에서 차트를 띄웠습니다. 파이썬은 아직도 몰라요. 필요할 때 배우면 되죠.",
-    formatHint: "thread",
-    postedAt: "2026-08-26T20:30:00+09:00",
-    metrics: { likes: 1450, comments: 96, shares: 120 },
-  },
-  // p032 노트플로우 · x · thread — number 훅, CTA 3, 사회적 증거(데이터), professional
-  {
-    id: "p032",
-    platform: "x",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/x/noteflow/p032",
-    text: "스타트업 300곳의 회의 데이터에서 발견한 숫자 4개 🧵\n\n1/ 평균 회의 시간 47분. 그중 결정에 쓰는 시간은 9분.\n\n2/ 회의 후 액션 아이템의 38%는 담당자가 정해지지 않은 채 끝납니다.\n\n3/ 회의록을 사람이 쓰는 팀은 작성에 평균 26분을 씁니다. 하루 3회면 78분.\n\n4/ 노트플로우 도입 팀은 액션 아이템 미배정률이 38% → 6%로 떨어졌습니다.\n\n5/ 팀 도입 가이드가 필요하시면 답글에 '가이드' 남겨주세요. DM으로 보내드립니다.",
-    formatHint: "thread",
-    postedAt: "2026-08-27T09:30:00+09:00",
-    metrics: { likes: 980, comments: 83, shares: 310 },
-  },
-  // p033 데일리싱크 · instagram · card_news — how_to 훅, CTA 2, educational
-  {
-    id: "p033",
-    platform: "instagram",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/instagram/dailysync.app/p033",
-    text: "회의 사이 애매한 30분, 버리지 않고 쓰는 법 4단계. 저장해두고 내일 써보세요 📌 앱은 프로필 링크에서 무료로.\n\n#시간관리 #직장인팁 #할일관리 #데일리싱크",
-    slides: [
-      "회의 사이 30분, 버리지 않고 쓰는 법",
-      "회의와 회의 사이 애매한 30분. 대부분 슬랙 보다가 끝나요.",
-      "① 전날 저녁, 30분 이하 짧은 할 일을 따로 표시해 둡니다.",
-      "② 캘린더에 빈 구간이 생기면 그 목록에서 하나를 꺼내 넣습니다.",
-      "③ 메일 답장, 경비 처리, 일정 조율 같은 '작은 일'이 여기에 딱 맞아요.",
-      "④ 데일리싱크는 빈 시간이 생기면 짧은 할 일을 자동으로 제안합니다.",
-      "저장해두고 내일 써보세요. 앱은 프로필 링크에서 무료로.",
+    "id": "p038",
+    "platform": "threads",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/threads/promptschool_kr/p038",
+    "text": "12월 워크샵, 남은 자리 확인하세요\n\n마감 임박, 서두르셔야 합니다.",
+    "slides": [
+      "누적 참여 기업 150곳 돌파",
+      "평균 만족도 4.8 / 5.0",
+      "12월 기수 정원 15팀 중 12팀 마감",
+      "남은 자리 3팀, 이번 주 내 마감 예상",
+      "신청은 프로필 링크에서"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-08-28T07:45:00+09:00",
-    metrics: { likes: 5200, comments: 96, shares: 1700 },
+    "formatHint": "card_news",
+    "postedAt": "2026-08-29T15:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 3438,
+      "comments": 126,
+      "shares": 80
+    }
   },
-  // p034 루틴랩 · youtube · long_video — question 훅, CTA 1, educational
   {
-    id: "p034",
-    platform: "youtube",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/youtube/routinelab/p034",
-    text: "왜 새해 계획은 2월이면 사라질까? — 습관 과학 연구 5편으로 정리한 '지속되는 루틴'의 조건\n\n작심삼일은 의지 문제가 아니라 설계 문제입니다. 이 영상에서는 습관 형성에 대한 연구 5편을 읽고, 실제로 지속되는 루틴의 공통 조건 4가지를 정리했습니다. 루틴랩이 왜 '체인'과 '프리즈' 기능을 이렇게 만들었는지도 함께 설명합니다.\n\n00:00 작심삼일의 진짜 원인\n04:30 66일이라는 숫자의 출처\n09:15 트리거 설계\n15:40 실패를 허용하는 시스템\n\n참고 문헌은 더보기란에 정리했습니다. 루틴랩 앱은 설명란 링크.",
-    formatHint: "long_video",
-    postedAt: "2026-08-31T18:00:00+09:00",
-    metrics: { views: 41000, likes: 1500, comments: 130 },
+    "id": "p039",
+    "platform": "x",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/x/automatelab/p039",
+    "text": "AI 도구는 넘쳐나는데, 왜 우리 팀 업무는 하나도 안 바뀔까요? 도구가 아니라 '워크플로우'가 문제일 수도 있습니다.",
+    "formatHint": "text",
+    "postedAt": "2026-07-24T10:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 500,
+      "comments": 15,
+      "shares": 261
+    }
   },
-  // p035 브레인덱 · threads · card_news — fear 훅, CTA 3, 사회적 증거, 긴급성, bold
   {
-    id: "p035",
-    platform: "threads",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/threads/braindeck/p035",
-    text: "시험 D-30인데 1회독도 안 끝났다면 — 처음부터 다시 읽는 건 답이 아닙니다. 기출 30일 덱, 이번 주 일요일까지 무료. 댓글에 '기출' 남기면 DM 드려요.",
-    slides: [
-      "시험 D-30인데 아직 책 1회독도 안 끝났다면",
-      "지금 처음부터 다시 읽으면 시험 날까지 절대 못 끝냅니다. 냉정하게요.",
-      "남은 30일엔 기출 → 틀린 것만 → 다시 틀린 것만. 범위를 줄이는 게 유일한 전략입니다.",
-      "브레인덱 '기출 30일 덱': 최근 5개년 기출을 카드로. 틀린 카드만 자동으로 다시 나와요.",
-      "이 덱으로 합격한 후기 2,000건. 평균 학습 시간 하루 22분.",
-      "이번 회차 시험 응시자 한정, 이번 주 일요일까지 무료. 댓글에 '기출' 남기면 DM 드립니다.",
+    "id": "p040",
+    "platform": "youtube",
+    "brand": "팀AI워크스",
+    "handle": "@teamai_works",
+    "url": "https://example.invalid/youtube/teamai_works/p040",
+    "text": "우리 팀도 AI 워크샵 필요할까요? #shorts\n\n팀원들이 각자 다른 툴을 쓰고 있다면, 서로 결과물을 공유해도 이해가 안 된다면, 이미 워크샵이 필요한 신호입니다. 별점 4.9, 리뷰 312개를 받은 팀AI워크스 워크샵이 궁금하시면 댓글에 '워크샵'이라고 남겨주세요. DM으로 커리큘럼 보내드립니다.",
+    "formatHint": "short_video",
+    "postedAt": "2026-08-10T12:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 224108,
+      "likes": 5168,
+      "comments": 456
+    }
+  },
+  {
+    "id": "p041",
+    "platform": "instagram",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/instagram/datafit_consulting/p041",
+    "text": "국내 중견기업 300곳 데이터를 분석한 결과, AI 전환에 성공한 조직의 공통점은 '기술'이 아니라 '데이터 정리 방식'이었습니다.\n\n도구를 먼저 고르기 전에, 우리 조직의 데이터가 어떻게 흐르고 있는지부터 살펴보세요. 데이터핏은 그 지점에서 시작합니다. #데이터전략 #AI전환컨설팅",
+    "formatHint": "image",
+    "postedAt": "2026-08-26T13:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 917,
+      "comments": 77,
+      "shares": 599
+    }
+  },
+  {
+    "id": "p042",
+    "platform": "threads",
+    "brand": "실무AI연구소",
+    "handle": "@bizai_lab",
+    "url": "https://example.invalid/threads/bizai_lab/p042",
+    "text": "'우리 회사는 데이터가 부족해서 AI 도입이 어렵다' — 컨설팅 다니면서 제일 많이 듣는 말입니다.\n\n근데 실제로 진단해보면 데이터가 없는 게 아니라 흩어져서 못 쓰는 경우가 대부분이에요. 엑셀 47개 파일에 나눠져 있던 재고 데이터, 통합하니 바로 예측 모델이 돌아가더라고요.",
+    "formatHint": "thread",
+    "postedAt": "2026-08-09T11:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 2279,
+      "comments": 170,
+      "shares": 214
+    }
+  },
+  {
+    "id": "p043",
+    "platform": "x",
+    "brand": "AX아카데미",
+    "handle": "@ax_academy",
+    "url": "https://example.invalid/x/ax_academy/p043",
+    "text": "AI 도입, 이 순서대로만 하면 됩니다",
+    "slides": [
+      "1단계: 반복 업무 리스트업",
+      "2단계: 데이터 정리 상태 점검",
+      "3단계: 우선순위 업무 선정",
+      "4단계: 소규모 파일럿 실행",
+      "5단계: 결과 측정 후 확산",
+      "순서를 건너뛰면 대부분 실패합니다."
     ],
-    formatHint: "card_news",
-    postedAt: "2026-09-01T21:00:00+09:00",
-    metrics: { likes: 4100, comments: 720, shares: 560 },
+    "formatHint": "card_news",
+    "postedAt": "2026-07-10T18:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 281,
+      "comments": 17,
+      "shares": 238
+    }
   },
-  // p036 포커스핏 · x · image — 훅 없음, CTA 0, luxury
   {
-    id: "p036",
-    platform: "x",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/x/focusfit_official/p036",
-    text: "오전 9시. 알림은 꺼져 있고, 화면엔 문서 하나.\n\n25분 뒤에 세상으로 돌아가겠습니다.",
-    formatHint: "image",
-    postedAt: "2026-09-02T09:00:00+09:00",
-    metrics: { likes: 260, comments: 8, shares: 31 },
+    "id": "p044",
+    "platform": "youtube",
+    "brand": "프롬프트스쿨",
+    "handle": "@promptschool_kr",
+    "url": "https://example.invalid/youtube/promptschool_kr/p044",
+    "text": "\"우리 회사는 AI 도입하기엔 너무 작다\"는 오해\n\n00:00 인트로 - 흔한 오해\n01:45 반례 - 직원 12명 회사의 AI 활용 사례\n04:30 작은 회사일수록 유리한 이유\n06:50 이번 분기 한정 컨설팅 안내\n\n규모가 작을수록 오히려 의사결정 속도가 빨라 AI 도입 효과가 더 크게 나타나는 경우가 많습니다. 이번 분기 한정으로 소규모 기업 대상 무료 진단 컨설팅을 진행합니다. 지금 상담 신청해보세요.",
+    "formatHint": "long_video",
+    "postedAt": "2026-09-11T15:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 184453,
+      "likes": 5577,
+      "comments": 491
+    }
   },
-  // p037 클래스온 · youtube · short_video — how_to 훅, CTA 2, playful
   {
-    id: "p037",
-    platform: "youtube",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/youtube/classon_kr/p037",
-    text: "#shorts 엑셀 표 3초 만에 예쁘게 만드는 법 (Ctrl+T 하나면 끝)\n\n범위 잡고 Ctrl+T → 스타일 고르기 → 끝. 필터, 줄무늬, 머리글 고정까지 자동. 이런 단축키 30개 모은 강의는 설명란에 👇",
-    formatHint: "short_video",
-    postedAt: "2026-09-03T12:10:00+09:00",
-    metrics: { views: 320000, likes: 11800, comments: 420 },
-  },
-  // p038 노트플로우 · threads · text — story 훅, CTA 0, playful
-  {
-    id: "p038",
-    platform: "threads",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/threads/noteflow/p038",
-    text: "오늘 회의 끝나고 팀장님이 '회의록 누가 써?' 하셨는데 다 같이 노트플로우 화면을 가리킴.\n\n30초간 정적.\n\n'…그래, 그럼 밥 먹으러 가자.'\n\n회의록 담당 없어진 지 두 달째. 이게 맞아요.",
-    formatHint: "text",
-    postedAt: "2026-09-04T13:00:00+09:00",
-    metrics: { likes: 2200, comments: 130, shares: 190 },
-  },
-  // p039 데일리싱크 · x · text — fear 훅, CTA 3, 사회적 증거, professional
-  {
-    id: "p039",
-    platform: "x",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/x/dailysync.app/p039",
-    text: "'그 요청 못 봤어요'로 놓친 일정, 올해만 몇 건이었는지 세어 보신 적 있나요?\n\n슬랙에 묻힌 요청은 평균 이틀 뒤에 발견됩니다. 데일리싱크는 슬랙·메일 요청을 자동으로 할 일로 바꿔 캘린더에 올립니다.\n\n앱스토어 생산성 1위, 리뷰 4.8. 답글에 '연동' 남기시면 슬랙 연동 세팅 가이드를 DM으로 드립니다.",
-    formatHint: "text",
-    postedAt: "2026-09-07T10:20:00+09:00",
-    metrics: { likes: 520, comments: 46, shares: 94 },
-  },
-  // p040 루틴랩 · instagram · image — announcement 훅, CTA 2, 사회적 증거, luxury
-  {
-    id: "p040",
-    platform: "instagram",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/instagram/routinelab/p040",
-    text: "66일. 4만 명. 완주율 71%.\n\n루틴랩 리뉴얼 앱을 공개합니다. 더 조용해졌고, 더 단단해졌습니다.\n\n프로필 링크에서 새 버전을 만나보세요.\n\n#루틴랩 #리뉴얼 #습관",
-    formatHint: "image",
-    postedAt: "2026-09-08T11:00:00+09:00",
-    metrics: { likes: 3400, comments: 88, shares: 260 },
-  },
-  // p041 브레인덱 · youtube · long_video — number 훅, CTA 2, 사회적 증거, professional
-  {
-    id: "p041",
-    platform: "youtube",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/youtube/braindeck/p041",
-    text: "합격 후기 2,000건 분석 — 직장인 자격증 합격자의 공통 학습 패턴 7가지\n\n브레인덱에 쌓인 합격 후기 2,000건과 학습 로그를 함께 분석했습니다. 놀랍게도 총 학습 시간은 합격 여부와 상관이 거의 없었고, '복습 간격'과 '틀린 카드 재학습률'이 가장 강한 변수였습니다.\n\n이 영상에서는 7가지 패턴을 데이터와 함께 보여드리고, 각 패턴을 브레인덱에서 세팅하는 법을 설명합니다.\n\n00:00 총 학습 시간은 중요하지 않다\n05:10 복습 간격\n11:30 틀린 카드 재학습률\n18:00 출퇴근 시간 활용\n24:15 7가지 패턴 요약\n\n설명란 링크에서 '합격자 패턴' 템플릿 덱을 받을 수 있습니다.",
-    formatHint: "long_video",
-    postedAt: "2026-09-09T18:30:00+09:00",
-    metrics: { views: 58000, likes: 2100, comments: 240 },
-  },
-  // p042 포커스핏 · threads · thread — how_to 훅, CTA 3, educational
-  {
-    id: "p042",
-    platform: "threads",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/threads/focusfit_official/p042",
-    text: "1/ 재택근무 집중력 지키는 법, 포커스핏 팀이 실제로 쓰는 세팅 4가지.\n\n2/ 첫째, 오전 9시~11시는 '무알림 블록'. 슬랙 상태를 자동으로 '집중 중'으로 바꿔둡니다.\n\n3/ 둘째, 25분 블록 사이 5분 휴식엔 반드시 자리에서 일어나기. 앱이 휴식 타이머를 따로 돌려요.\n\n4/ 셋째, 하루 끝에 집중 리포트 확인. 어디서 끊겼는지 보여야 다음 날 고칠 수 있어요.\n\n5/ 넷째, 금요일 오후는 블록 없음. 쉬어야 다음 주가 있어요.\n\n6/ 댓글에 '재택' 남기면 세팅 템플릿 DM 드릴게요.",
-    formatHint: "thread",
-    postedAt: "2026-09-10T09:40:00+09:00",
-    metrics: { likes: 1720, comments: 240, shares: 290 },
-  },
-  // p043 클래스온 · instagram · card_news — contrarian 훅, CTA 2, 사회적 증거, 긴급성, bold
-  {
-    id: "p043",
-    platform: "instagram",
-    brand: "클래스온",
-    handle: "@classon_kr",
-    url: "https://example.invalid/instagram/classon_kr/p043",
-    text: "자기계발서 100권보다 실무 클래스 1개가 낫습니다. 책은 동기를 주지만 월요일 아침 피벗 테이블은 동기로 안 만들어져요. 누적 수강생 12만 명이 선택한 이유, 6장에 담았어요. 이번 달 말까지 열리는 무료 강의 3개는 프로필 링크에서.\n\n#클래스온 #직장인공부 #실무강의",
-    slides: [
-      "자기계발서 100권보다 실무 클래스 1개가 낫습니다",
-      "책은 '동기'를 줍니다. 근데 월요일 아침 피벗 테이블은 동기로 안 만들어져요.",
-      "필요한 건 오늘 당장 쓸 수 있는 기술 하나. 그게 쌓이면 커리어가 됩니다.",
-      "클래스온은 전부 현직자가 실무 파일 그대로 가르칩니다. 이론 강의 없음.",
-      "누적 수강생 12만 명, 별점 4.9. 수강 후 '바로 써먹었다'는 후기가 제일 많아요.",
-      "이번 달 말까지 무료 강의 3개 열려 있어요. 프로필 링크에서 확인.",
+    "id": "p045",
+    "platform": "instagram",
+    "brand": "오토메이트랩",
+    "handle": "@automatelab",
+    "url": "https://example.invalid/instagram/automatelab/p045",
+    "text": "AI 교육, 신입만 들으면 된다는 착각이 조직 전체의 속도를 늦춥니다. #AI교육 #팀장워크샵 #조직전환",
+    "slides": [
+      "AI 교육은 젊은 직원만 들으면 된다?",
+      "❌ 통념: 신입/주니어만 배우면 조직 전체가 바뀐다",
+      "✅ 현실: 의사결정권 있는 팀장이 모르면 실행이 막힌다",
+      "저희 워크샵 참가자의 61%가 팀장급 이상입니다",
+      "이번 기수는 팀장 전용 트랙 별도 운영",
+      "정원 15명 중 11명 마감, 이번 주까지만 접수",
+      "지금 신청 마감 임박, 프로필 링크 확인하세요"
     ],
-    formatHint: "card_news",
-    postedAt: "2026-09-11T17:00:00+09:00",
-    metrics: { likes: 7800, comments: 230, shares: 1900 },
+    "formatHint": "card_news",
+    "postedAt": "2026-08-12T12:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 1995,
+      "comments": 44,
+      "shares": 418
+    }
   },
-  // p044 노트플로우 · youtube · long_video — announcement 훅, CTA 1, professional
   {
-    id: "p044",
-    platform: "youtube",
-    brand: "노트플로우",
-    handle: "@noteflow",
-    url: "https://example.invalid/youtube/noteflow/p044",
-    text: "노트플로우 2.5 공개 — 회의 요약을 노션·지라·슬랙으로 바로 보내는 '액션 연동' 소개\n\n이번 릴리스의 핵심은 회의에서 나온 액션 아이템을 이미 쓰고 있는 도구로 바로 보내는 기능입니다. 노션 데이터베이스, 지라 이슈, 슬랙 채널 중 원하는 곳에 담당자와 기한이 붙은 채로 생성됩니다.\n\n영상에서는 실제 스프린트 회의 하나를 처음부터 끝까지 돌리며 연동 과정을 보여드립니다.\n\n00:00 무엇이 바뀌었나\n02:40 노션 연동\n07:15 지라 연동\n11:50 슬랙 알림\n\n업데이트는 모든 플랜에 자동 적용됩니다.",
-    formatHint: "long_video",
-    postedAt: "2026-09-14T10:00:00+09:00",
-    metrics: { views: 9800, likes: 320, comments: 28 },
+    "id": "p046",
+    "platform": "threads",
+    "brand": "팀AI워크스",
+    "handle": "@teamai_works",
+    "url": "https://example.invalid/threads/teamai_works/p046",
+    "text": "워크샵 첫날 '저는 컴맹이라 못 따라갈 것 같아요' 하시던 분이 계셨어요.\n\n3주 뒤 그분이 팀 내 AI 전도사가 되어있더라고요. 저희 수강생 후기 평점 4.9, 궁금하시면 프로필 링크에서 후기 더 보실 수 있어요.",
+    "formatHint": "text",
+    "postedAt": "2026-07-26T10:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 2601,
+      "comments": 154,
+      "shares": 154
+    }
   },
-  // p045 데일리싱크 · threads · card_news — story 훅, CTA 4, 사회적 증거, 긴급성, friendly
   {
-    id: "p045",
-    platform: "threads",
-    brand: "데일리싱크",
-    handle: "@dailysync.app",
-    url: "https://example.invalid/threads/dailysync.app/p045",
-    text: "일정 두 개 겹쳐서 클라이언트한테 사과한 날 깔았어요. 그 뒤로 겹친 적 0번. 팀 플랜 40% 할인 9월 30일 마감 — 댓글에 '겹침' 남기면 할인 링크 + 세팅 가이드 DM 드릴게요 💌",
-    slides: [
-      "일정 두 개 겹쳐서 클라이언트한테 사과한 날, 이 앱을 깔았어요",
-      "구글 캘린더엔 회의, 노션엔 마감, 슬랙엔 '내일 10시 괜찮으세요?'. 셋 다 확인 안 하면 겹칩니다. 제가 그랬어요.",
-      "데일리싱크는 세 군데를 한 화면에 모으고, 겹치면 미리 알려줍니다.",
-      "그날 이후로 겹친 적 0번. 리뷰 4.8점이 괜히 나온 게 아니더라고요.",
-      "지금 팀 플랜 연간 40% 할인 중인데 9월 30일까지예요.",
-      "댓글에 '겹침' 남기면 할인 링크 + 캘린더 세팅 가이드 DM 드릴게요 💌",
-    ],
-    formatHint: "card_news",
-    postedAt: "2026-09-15T20:00:00+09:00",
-    metrics: { likes: 1560, comments: 420, shares: 230 },
+    "id": "p047",
+    "platform": "x",
+    "brand": "데이터핏컨설팅",
+    "handle": "@datafit_consulting",
+    "url": "https://example.invalid/x/datafit_consulting/p047",
+    "text": "'AI 교육은 젊은 직원한테나 필요하다'는 건 오해입니다. 저희 워크샵 수강생 평균 연령은 41세, 부서장급이 62%입니다. 댓글에 '진단'이라고 남기시면 DM으로 무료 업무 진단표 보내드립니다.",
+    "formatHint": "text",
+    "postedAt": "2026-09-14T16:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "likes": 481,
+      "comments": 8,
+      "shares": 153
+    }
   },
-  // p046 루틴랩 · x · thread — question 훅, CTA 2, friendly
   {
-    id: "p046",
-    platform: "x",
-    brand: "루틴랩",
-    handle: "@routinelab",
-    url: "https://example.invalid/x/routinelab/p046",
-    text: "퇴근하면 아무것도 하기 싫은 게 정상 아닌가요? 🧵\n\n1/ 네, 정상이에요. 의지력은 오후에 바닥나거든요. 그래서 '퇴근 후 운동'은 설계부터 잘못됐습니다.\n\n2/ 대신 이렇게 해보세요. 퇴근길에 운동복으로 갈아입기 — 이게 끝. 운동은 안 해도 돼요.\n\n3/ 3일쯤 지나면 갈아입은 김에 10분 걷게 됩니다. 그게 시작이에요.\n\n4/ 루틴랩에 '퇴근길 운동복' 체인 템플릿 올려뒀어요. 프로필 링크에서 가져가세요.",
-    formatHint: "thread",
-    postedAt: "2026-09-16T08:50:00+09:00",
-    metrics: { likes: 2300, comments: 180, shares: 610 },
-  },
-  // p047 브레인덱 · instagram · short_video — contrarian 훅, CTA 3, 긴급성, bold
-  {
-    id: "p047",
-    platform: "instagram",
-    brand: "브레인덱",
-    handle: "@braindeck",
-    url: "https://example.invalid/instagram/braindeck/p047",
-    text: "공부 시간 늘리지 마세요. 진짜로요.\n\n총 공부 시간과 합격은 상관이 거의 없어요. 중요한 건 '틀린 걸 다시 보는 간격'. 브레인덱은 그 간격을 계산해서 오늘 볼 카드만 줍니다.\n\n이번 주까지 신규 가입자에게 자격증 덱 1개 무료 — 댓글에 '덱' 남기면 DM 드려요 📩\n\n#자격증 #공부법 #브레인덱 #직장인공부",
-    formatHint: "short_video",
-    postedAt: "2026-09-17T12:30:00+09:00",
-    metrics: { views: 128000, likes: 6900, comments: 510, shares: 890 },
-  },
-  // p048 포커스핏 · youtube · short_video — announcement 훅, CTA 2, 긴급성, friendly
-  {
-    id: "p048",
-    platform: "youtube",
-    brand: "포커스핏",
-    handle: "@focusfit_official",
-    url: "https://example.invalid/youtube/focusfit_official/p048",
-    text: "#shorts 포커스핏 위젯 나왔어요 ⏱️ 홈 화면에서 바로 25분 시작\n\n이번 주까지 프리미엄 7일 무료. 설명란 링크에서 업데이트하세요!",
-    formatHint: "short_video",
-    postedAt: "2026-09-18T10:00:00+09:00",
-    metrics: { views: 36000, likes: 1900, comments: 95 },
-  },
+    "id": "p048",
+    "platform": "youtube",
+    "brand": "실무AI연구소",
+    "handle": "@bizai_lab",
+    "url": "https://example.invalid/youtube/bizai_lab/p048",
+    "text": "챗GPT로 보고서 초안 5분 만에 뽑는 법 #shorts\n\n주간 보고서 쓸 때마다 시간 잡아먹히시나요? 지난주 데이터만 넣으면 5분 만에 초안이 나오는 프롬프트 템플릿, 오늘 영상에서 바로 보여드립니다. 따라 해보시고 얼마나 빨라졌는지 댓글로 알려주세요.",
+    "formatHint": "short_video",
+    "postedAt": "2026-08-28T14:00:00.000Z",
+    "source": "sample",
+    "metrics": {
+      "views": 209275,
+      "likes": 5004,
+      "comments": 329
+    }
+  }
 ];
