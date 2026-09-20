@@ -136,7 +136,8 @@ function buildPastedPosts(input: {
     .split("\n")
     .map((u) => u.trim())
     .filter(Boolean);
-  const brand = input.brand.trim().replace(/^@/, "") || "경쟁사";
+  // 서버 스키마: brand ≤ 80자, handle("@"+brand) ≤ 80자 → 60자로 자름
+  const brand = (input.brand.trim().replace(/^@/, "") || "경쟁사").slice(0, 60);
   const posts: Post[] = chunks.map((text, i) => ({
     id: `u${String(i + 1).padStart(3, "0")}`,
     platform: input.platform,
@@ -150,11 +151,14 @@ function buildPastedPosts(input: {
   return { posts };
 }
 
-/** API 에러 본문 { error } → 메시지 */
+/** API 에러 본문 { error, issues? } → 메시지 (검증 실패 시 issues 를 뒤에 붙임) */
 function errorOf(json: unknown, status: number): string {
   if (json && typeof json === "object") {
-    const e = (json as { error?: unknown }).error;
-    if (typeof e === "string" && e.trim()) return e;
+    const o = json as { error?: unknown; issues?: unknown };
+    if (typeof o.error === "string" && o.error.trim()) {
+      const issues = Array.isArray(o.issues) ? o.issues.filter((i): i is string => typeof i === "string") : [];
+      return issues.length ? `${o.error} — ${issues.join(" / ")}` : o.error;
+    }
   }
   return `서버 응답 오류 (${status})`;
 }
