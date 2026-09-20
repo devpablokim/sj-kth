@@ -1,15 +1,18 @@
 /*
- * Dashboard — 클라이언트 루트. useRun 으로 SSE 실행 상태를 갖고, 브랜드 폼 · 붙여넣은 포스트 · 선택 타일 ·
- * 열린 시안 · 경과 타이머(100ms)를 관리하며 Header / RunControls / StatTiles / 2열 그리드 / CallLog 를 조립합니다.
+ * Dashboard — 클라이언트 루트. useRun 으로 SSE 실행 상태를 갖고, 브랜드 폼 · 불러온 포스트(+출처) · 선택 타일 ·
+ * 열린 포스트 상세(PostDrawer) · 열린 시안(DraftDrawer) · 경과 타이머(100ms)를 관리하며
+ * Header / HelpPanel / RunControls / StatTiles / 2열 그리드 / CallLog 를 조립합니다.
  * ≥1024px: 좌 47% ContentFeed, 우 53% (AnalyzingPanel · Breakdown · Drafts). 그 아래 전폭 CallLog.
+ * 타일·TOP BENCHMARKS 클릭 → 선택 + PostDrawer(원문 · 판정 · 원문 링크 · 이 포스트로 시안 만들기).
  */
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import type { Draft, Post, RunRequest } from "@/lib/types";
+import type { CallLogEntry, Draft, Post, PostSource, RunRequest } from "@/lib/types";
 import { useRun } from "@/lib/client/useRun";
 import { SAMPLE_POSTS } from "@/data/samplePosts";
 import Header from "./Header";
+import HelpPanel from "./HelpPanel";
 import RunControls, { type BrandForm } from "./RunControls";
 import StatTiles from "./StatTiles";
 import ContentFeed from "./ContentFeed";
@@ -17,6 +20,7 @@ import AnalyzingPanel from "./AnalyzingPanel";
 import Breakdown from "./Breakdown";
 import Drafts from "./Drafts";
 import DraftDrawer from "./DraftDrawer";
+import PostDrawer from "./PostDrawer";
 import CallLog from "./CallLog";
 
 /** /api/health 응답 중 화면에 쓰는 부분 (키 값은 서버가 절대 내려보내지 않음) */
@@ -37,18 +41,29 @@ function parseHealth(v: unknown): Health | null {
   };
 }
 
+/** 비워 두어 placeholder("예: …")가 입력 안내 역할을 하도록 함 — 브랜드명을 채워야 RUN 이 활성화 */
 const DEFAULT_FORM: BrandForm = {
-  name: "포커스핏",
-  category: "직장인 온라인 클래스 / 생산성 앱",
-  positioning: "바쁜 직장인을 위한 25분 집중 루틴",
+  name: "",
+  category: "",
+  positioning: "",
   draftCount: 3,
 };
 
+/** RunControls 의 "현재 분석 대상" 라벨 */
+const SOURCE_LABEL: Record<PostSource, string> = {
+  sample: "샘플 48건 (생산성 앱 · 데모용)",
+  generated: "카테고리 예시 생성 (AI · 실제 게시물 아님)",
+  pasted: "직접 붙여넣기",
+  youtube: "YouTube 검색",
+};
+
 export default function Dashboard() {
-  const { state, start, stop, setPosts, clearCalls } = useRun(SAMPLE_POSTS);
+  const { state, start, stop, setPosts, clearCalls, addDraft, addCalls } = useRun(SAMPLE_POSTS);
   const [form, setForm] = useState<BrandForm>(DEFAULT_FORM);
   const [customPosts, setCustomPosts] = useState<Post[] | null>(null);
+  const [source, setSource] = useState<PostSource>("sample");
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [openPost, setOpenPost] = useState<Post | null>(null);
   const [openDraft, setOpenDraft] = useState<Draft | null>(null);
   /** 실행 중 100ms 마다 갱신되는 "지금" (렌더 중 Date.now() 호출을 피하기 위해 상태로 보관) */
   const [now, setNow] = useState(0);
@@ -82,10 +97,12 @@ export default function Dashboard() {
     : 0;
 
   const onPostsLoaded = useCallback(
-    (posts: Post[] | null) => {
+    (posts: Post[] | null, src: PostSource | null) => {
       setCustomPosts(posts);
+      setSource(posts && src ? src : "sample");
       setPosts(posts ?? SAMPLE_POSTS);
       setSelectedId(null);
+      setOpenPost(null);
       setOpenDraft(null);
     },
     [setPosts],
@@ -94,13 +111,37 @@ export default function Dashboard() {
   const onRun = useCallback(
     (request: RunRequest) => {
       setSelectedId(null);
+      setOpenPost(null);
       setOpenDraft(null);
       void start(request, customPosts ?? SAMPLE_POSTS);
     },
     [start, customPosts],
   );
 
+  /** 타일 / TOP BENCHMARKS 클릭 — 선택 표시 + 상세 드로어 */
+  const onSelectPost = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      setOpenPost(state.posts.find((p) => p.id === id) ?? null);
+    },
+    [state.posts],
+  );
+
+  const closePost = useCallback(() => setOpenPost(null), []);
   const closeDraft = useCallback(() => setOpenDraft(null), []);
+
+  const onDraftCreated = useCallback(
+    (draft: Draft, calls: CallLogEntry[]) => {
+      addDraft(draft);
+      addCalls(calls);
+    },
+    [addDraft, addCalls],
+  );
+
+  const openDraftFromPost = useCallback((d: Draft) => {
+    setOpenPost(null);
+    setOpenDraft(d);
+  }, []);
 
   // "ANALYZING POST" 패널에 보여줄 포스트:
   // 실행 중 in-flight/current → (사용자가 클릭한) selectedId → 마지막 완료 → 첫 완료 → 없음
@@ -120,11 +161,13 @@ export default function Dashboard() {
     <main className="mx-auto flex w-full max-w-[1440px] flex-col gap-3 p-4">
       <Header
         posts={state.posts}
-        source={customPosts ? "custom" : "sample"}
+        source={source}
         mode={mode}
         jevModel={state.jevModel ?? health?.jevModel ?? null}
         draftModel={state.draftModel ?? (health?.draftModel || null)}
       />
+
+      <HelpPanel />
 
       <RunControls
         status={state.status}
@@ -135,6 +178,8 @@ export default function Dashboard() {
         onRun={onRun}
         onStop={stop}
         postsCount={state.posts.length}
+        mode={mode}
+        sourceLabel={SOURCE_LABEL[source]}
       />
 
       {state.errors.length > 0 && (
@@ -155,7 +200,7 @@ export default function Dashboard() {
           inFlight={state.inFlight}
           errorIds={errorIds}
           selectedId={selectedId}
-          onSelect={(id) => setSelectedId((prev) => (prev === id ? null : id))}
+          onSelect={onSelectPost}
         />
         <div className="flex min-w-0 flex-col gap-3">
           <AnalyzingPanel post={shownPost} analysis={shownAnalysis} analyzing={shownAnalyzing} />
@@ -171,6 +216,18 @@ export default function Dashboard() {
       </div>
 
       <CallLog calls={state.calls} onClear={clearCalls} />
+
+      {openPost && (
+        <PostDrawer
+          post={openPost}
+          analysis={state.analyses.get(openPost.id) ?? null}
+          brand={{ name: form.name, category: form.category, positioning: form.positioning }}
+          existingDraft={state.drafts.find((d) => d.sourcePostId === openPost.id) ?? null}
+          onClose={closePost}
+          onDraftCreated={onDraftCreated}
+          onOpenDraft={openDraftFromPost}
+        />
+      )}
 
       {openDraft && <DraftDrawer draft={openDraft} sourcePost={drawerSource} onClose={closeDraft} />}
     </main>
